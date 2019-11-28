@@ -86,7 +86,7 @@ export default {
             this.loading = true
             let name = this.form.getFieldValue('name')
             let password = this.form.getFieldValue('password')
-            this.$post('login', {
+            this.$post('/api/login ', {
               username: name,
               password: password
             }).then((r) => {

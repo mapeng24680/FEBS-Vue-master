@@ -1,6 +1,7 @@
 server:
   port: 9527
-
+  servlet:
+    context-path: /api
 spring:
   datasource:
     dynamic:
@@ -78,6 +79,6 @@ febs:
         num: 1000
   shiro:
     # 后端免认证接口 url
-    anonUrl: /login,/logout/**,/regist,/user/check/**
+    anonUrl: /api/login,/api/logout/**,/api/regist,/api/user/check/**
     # token有效期，单位秒
     jwtTimeOut: 3600

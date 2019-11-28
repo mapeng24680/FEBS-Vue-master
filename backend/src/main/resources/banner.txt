@@ -5,5 +5,5 @@
 |                                         |
 |    Shiro Vue edition v1.0               |
 |    Spring-Boot-Version: ${spring-boot.version}   |
-|    QQ group : 715689981                 |
+|    QQ group : 1009342009                 |
 |-----------------------------------------|
