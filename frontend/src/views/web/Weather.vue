@@ -185,7 +185,7 @@ export default {
       if (!this.areaId) {
         this.$message.warning('请选择城市')
       } else {
-        this.$get('weather?areaId=' + this.areaId).then((r) => {
+        this.$get('/api/weather?areaId=' + this.areaId).then((r) => {
           let data = JSON.parse(r.data.data)
           if (data.code === '200') {
             this.weather = {

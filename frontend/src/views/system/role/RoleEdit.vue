@@ -172,10 +172,10 @@ export default {
   watch: {
     roleEditVisiable () {
       if (this.roleEditVisiable) {
-        this.$get('menu').then((r) => {
+        this.$get('/api/menu').then((r) => {
           this.menuTreeData = r.data.rows.children
           this.allTreeKeys = r.data.ids
-          this.$get('role/menu/' + this.roleInfoData.roleId).then((r) => {
+          this.$get('/api/role/menu/' + this.roleInfoData.roleId).then((r) => {
             this.defaultCheckedKeys.splice(0, this.defaultCheckedKeys.length, r.data)
             this.checkedKeys = r.data
             this.expandedKeys = r.data

@@ -233,7 +233,7 @@ export default {
   },
   mounted () {
     this.welcomeMessage = this.welcome()
-    this.$get(`index/${this.user.username}`).then((r) => {
+    this.$get(`/api/index/${this.user.username}`).then((r) => {
       let data = r.data.data
       this.todayIp = data.todayIp
       this.todayVisitCount = data.todayVisitCount

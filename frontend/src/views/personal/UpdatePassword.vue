@@ -191,7 +191,7 @@ export default {
     handleOldPassowrd (rule, value, callback) {
       let password = this.oldPassword
       if (this.oldPassword.trim().length) {
-        this.$get('user/password/check', {
+        this.$get('/api/user/password/check', {
           password: password,
           username: this.user.username
         }).then((r) => {

@@ -53,9 +53,9 @@ export default {
   watch: {
     roleInfoVisiable () {
       if (this.roleInfoVisiable) {
-        this.$get('menu').then((r) => {
+        this.$get('/api/menu').then((r) => {
           this.menuTreeData = r.data.rows.children
-          this.$get('role/menu/' + this.roleInfoData.roleId).then((r) => {
+          this.$get('/api/role/menu/' + this.roleInfoData.roleId).then((r) => {
             let length = this.checkedKeys.length
             this.checkedKeys.splice(0, length, r.data)
             this.key = +new Date()

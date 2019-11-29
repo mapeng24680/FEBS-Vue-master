@@ -147,7 +147,7 @@ export default {
   watch: {
     buttonEditVisiable () {
       if (this.buttonEditVisiable) {
-        this.$get('menu', {
+        this.$get('/api/menu', {
           type: '0'
         }).then((r) => {
           this.menuTreeData = r.data.rows.children

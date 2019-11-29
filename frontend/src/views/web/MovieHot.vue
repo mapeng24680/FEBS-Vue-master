@@ -151,12 +151,12 @@ export default {
       this.activeKey = '1'
       this.detailShow = true
       this.detailLoading = true
-      this.$get('movie/detail?id=' + id).then((r) => {
+      this.$get('/api/movie/detail?id=' + id).then((r) => {
         let data = JSON.parse(r.data.data)
         data = data.data
         this.movieDetail = data
         this.detailLoading = false
-        this.$get('movie/comments?id=' + id).then((r) => {
+        this.$get('/api/movie/comments?id=' + id).then((r) => {
           let data = JSON.parse(r.data.data)
           data = data.data
           this.comments = this.comments.concat(data.mini.list)
@@ -198,7 +198,7 @@ export default {
         that.screenWidth = window.screenWidth
       })()
     }
-    this.$get('movie/hot').then((r) => {
+    this.$get('/api/movie/hot').then((r) => {
       let data = JSON.parse(r.data.data)
       this.movies = data.ms
       this.loading = false

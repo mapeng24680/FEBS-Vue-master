@@ -105,7 +105,7 @@ export default {
       }
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$post('job', {
+          this.$post('/api/job', {
             ...this.job
           }).then(() => {
             this.reset()
@@ -119,7 +119,7 @@ export default {
     checkCron () {
       let cron = this.job.cronExpression.trim()
       if (cron.length) {
-        this.$get('job/cron/check?cron=' + cron).then((r) => {
+        this.$get('/api/job/cron/check?cron=' + cron).then((r) => {
           if (!r.data) {
             this.validateStatus = 'error'
             this.help = '请填写合法的Cron表达式'

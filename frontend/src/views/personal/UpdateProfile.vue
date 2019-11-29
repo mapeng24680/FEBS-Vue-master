@@ -141,7 +141,7 @@ export default {
             this.loading = false
             this.$emit('success')
             // 更新其state
-            this.$get(`user/${user.username}`).then((r) => {
+            this.$get(`/api/user/${user.username}`).then((r) => {
               this.setUser(r.data)
             })
           }).catch(() => {
@@ -154,7 +154,7 @@ export default {
   watch: {
     profileEditVisiable () {
       if (this.profileEditVisiable) {
-        this.$get('dept').then((r) => {
+        this.$get('/api/dept').then((r) => {
           this.deptTreeData = r.data.rows.children
         })
       }

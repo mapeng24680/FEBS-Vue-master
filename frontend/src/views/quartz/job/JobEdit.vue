@@ -129,7 +129,7 @@ export default {
     checkCron () {
       let cron = this.form.getFieldValue('cronExpression')
       if (cron.length) {
-        this.$get('job/cron/check?cron=' + cron).then((r) => {
+        this.$get('/api/job/cron/check?cron=' + cron).then((r) => {
           if (!r.data) {
             this.validateStatus = 'error'
             this.help = '请填写合法的Cron表达式'

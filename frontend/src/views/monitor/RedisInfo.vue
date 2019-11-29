@@ -129,8 +129,8 @@ export default {
     this.timer = setInterval(() => {
       if (this.$route.path.indexOf('redis') !== -1) {
         axios.all([
-          this.$get('redis/keysSize'),
-          this.$get('redis/memoryInfo')
+          this.$get('/api/redis/keysSize'),
+          this.$get('/api/redis/memoryInfo')
         ]).then((r) => {
           let currentMemory = r[1].data.used_memory / 1000
           let currentSize = r[0].data.dbSize
@@ -201,7 +201,7 @@ export default {
         })
       }
     }, 3000)
-    this.$get('redis/info').then((r) => {
+    this.$get('/api/redis/info').then((r) => {
       this.redisInfo = r.data.data
     })
   }

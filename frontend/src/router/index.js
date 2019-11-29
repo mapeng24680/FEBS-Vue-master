@@ -42,7 +42,7 @@ router.beforeEach((to, from, next) => {
   if (token.length && user) {
     if (!asyncRouter) {
       if (!userRouter) {
-        request.get(`menu/${user.username}`).then((res) => {
+        request.get(`/api/menu/${user.username}`).then((res) => {
           asyncRouter = res.data
           save('USER_ROUTER', asyncRouter)
           go(to, next)

@@ -74,11 +74,11 @@ export default {
     create () {
       this.time = moment().format('YYYY年MM月DD日 HH时mm分ss秒')
       axios.all([
-        this.$get('actuator/metrics/system.cpu.count'),
-        this.$get('actuator/metrics/system.cpu.usage'),
-        this.$get('actuator/metrics/process.uptime'),
-        this.$get('actuator/metrics/process.start.time'),
-        this.$get('actuator/metrics/process.cpu.usage')
+        this.$get('/api/actuator/metrics/system.cpu.count'),
+        this.$get('/api/actuator/metrics/system.cpu.usage'),
+        this.$get('/api/actuator/metrics/process.uptime'),
+        this.$get('/api/actuator/metrics/process.start.time'),
+        this.$get('/api/actuator/metrics/process.cpu.usage')
       ]).then((r) => {
         this.system.cpu.count = r[0].data.measurements[0].value
         this.system.cpu.usage = this.convert(r[1].data.measurements[0].value)

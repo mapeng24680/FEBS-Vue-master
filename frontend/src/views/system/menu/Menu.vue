@@ -305,7 +305,7 @@ export default {
     },
     fetch (params = {}) {
       this.loading = true
-      this.$get('menu', {
+      this.$get('/api/menu', {
         ...params
       }).then((r) => {
         let data = r.data

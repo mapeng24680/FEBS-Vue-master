@@ -170,7 +170,7 @@ export default {
           }
           // 0 表示菜单 1 表示按钮
           this.menu.type = '0'
-          this.$post('menu', {
+          this.$post('/api/menu', {
             ...this.menu
           }).then(() => {
             this.reset()
@@ -185,7 +185,7 @@ export default {
   watch: {
     menuAddVisiable () {
       if (this.menuAddVisiable) {
-        this.$get('menu', {
+        this.$get('/api/menu', {
           type: '0'
         }).then((r) => {
           this.menuTreeData = r.data.rows.children

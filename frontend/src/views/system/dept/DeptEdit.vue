@@ -131,7 +131,7 @@ export default {
   watch: {
     deptEditVisiable () {
       if (this.deptEditVisiable) {
-        this.$get('dept').then((r) => {
+        this.$get('/api/dept').then((r) => {
           this.deptTreeData = r.data.rows.children
           this.deptTreeKey = +new Date()
         })

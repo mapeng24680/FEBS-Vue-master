@@ -218,7 +218,7 @@ export default {
   watch: {
     menuEditVisiable () {
       if (this.menuEditVisiable) {
-        this.$get('menu', {
+        this.$get('/api/menu', {
           type: '0'
         }).then((r) => {
           this.menuTreeData = r.data.rows.children

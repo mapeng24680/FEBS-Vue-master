@@ -37,7 +37,7 @@ export default {
       this.getArticle(this.article.date.next)
     },
     getArticle (date = '') {
-      this.$get('article?date=' + date).then((r) => {
+      this.$get('/api/article?date=' + date).then((r) => {
         this.loading = false
         let data = JSON.parse(r.data.data)
         data = data.data

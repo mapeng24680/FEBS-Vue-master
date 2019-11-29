@@ -146,7 +146,7 @@ export default {
           if (!err) {
             this.loading = true
             this.role.menuId = checkedArr.join(',')
-            this.$post('role', {
+            this.$post('/api/role', {
               ...this.role
             }).then((r) => {
               this.reset()
@@ -166,7 +166,7 @@ export default {
           this.help = '角色名称不能超过10个字符'
         } else {
           this.validateStatus = 'validating'
-          this.$get(`role/check/${roleName}`).then((r) => {
+          this.$get(`/api/role/check/${roleName}`).then((r) => {
             if (r.data) {
               this.validateStatus = 'success'
               this.help = ''
@@ -185,7 +185,7 @@ export default {
   watch: {
     roleAddVisiable () {
       if (this.roleAddVisiable) {
-        this.$get('menu').then((r) => {
+        this.$get('/api/menu').then((r) => {
           this.menuTreeData = r.data.rows.children
           this.allTreeKeys = r.data.ids
         })

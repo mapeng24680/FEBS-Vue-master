@@ -258,7 +258,7 @@ export default {
     },
     runJob (record) {
       let jobId = record.jobId
-      this.$get('job/run/' + jobId).then(() => {
+      this.$get('/api/job/run/' + jobId).then(() => {
         this.$message.success('执行定时任务成功')
         this.search()
       }).catch(() => {
@@ -267,7 +267,7 @@ export default {
     },
     pauseJob (record) {
       let jobId = record.jobId
-      this.$get('job/pause/' + jobId).then(() => {
+      this.$get('/api/job/pause/' + jobId).then(() => {
         this.$message.success('暂停定时任务成功')
         this.search()
       }).catch(() => {
@@ -276,7 +276,7 @@ export default {
     },
     resumeJob (record) {
       let jobId = record.jobId
-      this.$get('job/resume/' + jobId).then(() => {
+      this.$get('/api/job/resume/' + jobId).then(() => {
         this.$message.success('恢复定时任务成功')
         this.search()
       }).catch(() => {
@@ -383,7 +383,7 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      this.$get('job', {
+      this.$get('/api/job', {
         ...params
       }).then((r) => {
         let data = r.data

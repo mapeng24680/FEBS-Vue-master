@@ -83,7 +83,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$post('dict', {
+          this.$post('/api/dict', {
             ...this.dict
           }).then(() => {
             this.reset()

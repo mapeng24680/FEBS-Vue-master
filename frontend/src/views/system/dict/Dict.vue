@@ -257,7 +257,7 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      this.$get('dict', {
+      this.$get('/api/dict', {
         ...params
       }).then((r) => {
         let data = r.data

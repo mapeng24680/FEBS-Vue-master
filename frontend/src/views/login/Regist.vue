@@ -188,7 +188,7 @@ export default {
         } else if (username.length < 4) {
           callback(new Error('用户名不能少于4个字符'))
         } else {
-          this.$get(`user/check/${username}`).then((r) => {
+          this.$get(`/api/user/check/${username}`).then((r) => {
             if (r.data) {
               callback()
             } else {
@@ -217,7 +217,7 @@ export default {
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$post('regist', {
+          this.$post('/api/regist', {
             username: this.username,
             password: this.password
           }).then(() => {

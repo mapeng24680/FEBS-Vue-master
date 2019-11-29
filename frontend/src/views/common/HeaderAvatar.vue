@@ -78,7 +78,7 @@ export default {
       }, 1500)
     },
     logout () {
-      this.$get(`logout/${this.user.id}`).then(() => {
+      this.$get(`/api/logout/${this.user.id}`).then(() => {
         return new Promise((resolve, reject) => {
           this.$db.clear()
           location.reload()

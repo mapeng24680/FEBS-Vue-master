@@ -9,7 +9,7 @@
           <a-form-item
             fieldDecoratorId="name"
             :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入账户名', whitespace: true}]}">
-            <a-input size="large">
+            <a-input size="large" >
               <a-icon slot="prefix" type="user"></a-icon>
             </a-input>
           </a-form-item>
@@ -86,7 +86,7 @@ export default {
             this.loading = true
             let name = this.form.getFieldValue('name')
             let password = this.form.getFieldValue('password')
-            this.$post('login', {
+            this.$post('/api/login', {
               username: name,
               password: password
             }).then((r) => {
