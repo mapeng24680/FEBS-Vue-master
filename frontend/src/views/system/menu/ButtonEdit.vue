@@ -132,7 +132,7 @@ export default {
           // 0 表示菜单 1 表示按钮
           button.type = '1'
           button.menuId = this.button.menuId
-          this.$put('menu', {
+          this.$put('/api/menu', {
             ...button
           }).then(() => {
             this.reset()

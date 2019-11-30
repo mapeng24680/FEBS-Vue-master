@@ -156,7 +156,7 @@ export default {
             let role = this.form.getFieldsValue()
             role.roleId = this.roleInfoData.roleId
             role.menuId = checkedArr.join(',')
-            this.$put('role', {
+            this.$put('/api/role', {
               ...role
             }).then((r) => {
               this.reset()

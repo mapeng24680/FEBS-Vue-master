@@ -115,7 +115,7 @@ export default {
           let job = this.form.getFieldsValue()
           job.jobId = this.job.jobId
           job.status = this.job.status
-          this.$put('job', {
+          this.$put('/api/job', {
             ...job
           }).then(() => {
             this.reset()

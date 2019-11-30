@@ -85,7 +85,7 @@ export default {
         return
       }
       this.updating = true
-      this.$put('user/avatar', {
+      this.$put('/api/user/avatar', {
         username: this.user.username,
         avatar
       }).then(() => {

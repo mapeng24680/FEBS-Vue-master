@@ -132,7 +132,7 @@ export default {
     handleUpdatePassword () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$put('user/password', {
+          this.$put('/api/user/password', {
             password: this.newPassword,
             username: this.user.username
           }).then(() => {

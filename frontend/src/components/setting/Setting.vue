@@ -106,7 +106,7 @@ export default {
       this.$store.commit('setting/fixHeader', checked)
     },
     updateUserConfig () {
-      this.$put('user/userconfig', {
+      this.$put('/api/user/userconfig', {
         multiPage: this.multipage ? '1' : '0',
         theme: this.theme,
         fixedSiderbar: this.fixedSiderbar ? '1' : '0',

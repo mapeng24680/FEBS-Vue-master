@@ -203,7 +203,7 @@ export default {
           }
           // 0 表示菜单 1 表示按钮
           menu.type = '0'
-          this.$put('menu', {
+          this.$put('/api/menu', {
             ...menu
           }).then(() => {
             this.reset()

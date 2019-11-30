@@ -92,7 +92,7 @@ export default {
         if (!err) {
           let dict = this.form.getFieldsValue()
           dict.dictId = this.dict.dictId
-          this.$put('dict', {
+          this.$put('/api/dict', {
             ...dict
           }).then(() => {
             this.reset()

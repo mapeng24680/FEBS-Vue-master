@@ -135,7 +135,7 @@ export default {
           user.roleId = this.roleId
           user.status = this.status
           user.username = this.username
-          this.$put('user/profile', {
+          this.$put('/api/user/profile', {
             ...user
           }).then((r) => {
             this.loading = false

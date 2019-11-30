@@ -149,7 +149,7 @@ export default {
           user.roleId = user.roleId.join(',')
           user.userId = this.userId
           user.deptId = this.userDept
-          this.$put('user', {
+          this.$put('/api/user', {
             ...user
           }).then((r) => {
             this.loading = false

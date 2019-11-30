@@ -116,7 +116,7 @@ export default {
             dept.parentId = 0
           }
           dept.deptId = this.dept.deptId
-          this.$put('dept', {
+          this.$put('/api/dept', {
             ...dept
           }).then(() => {
             this.reset()
