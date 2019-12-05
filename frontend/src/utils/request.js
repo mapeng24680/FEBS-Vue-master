@@ -7,7 +7,7 @@ moment.locale('zh-cn')
 
 // 统一配置
 let FEBS_REQUEST = axios.create({
-  // baseURL: 'http://127.0.0.1:9527/',
+  // baseURL: 'http://mapengapi.enjoysala.top',
   responseType: 'json',
   validateStatus (status) {
     // 200 外的状态码都认定为失败
@@ -81,7 +81,10 @@ const request = {
   post (url, params) {
     return FEBS_REQUEST.post(url, params, {
       transformRequest: [(params) => {
-        let result = ''
+        let result = '';
+        if (typeof params =='string'){
+           return  result = params
+        }
         Object.keys(params).forEach((key) => {
           if (!Object.is(params[key], undefined) && !Object.is(params[key], null)) {
             result += encodeURIComponent(key) + '=' + encodeURIComponent(params[key]) + '&'

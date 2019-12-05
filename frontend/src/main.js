@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Febs from './FEBS'
+import './assets/common/css/common.styl'
 import router from './router'
 import Antd from 'ant-design-vue'
 import store from './store'

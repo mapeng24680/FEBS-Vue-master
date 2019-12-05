@@ -13,6 +13,10 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
+      '/baseinfo': {
+        target: 'https://admin.kaoshixing.com', //                 如果是https接口，需要配置这个参数
+        changeOrigin: true // 如果接口跨域，需要进行这个参数配置
+      },
       '/api': {
         target: 'http://mapengapi.enjoysala.top', //                 如果是https接口，需要配置这个参数
         changeOrigin: true // 如果接口跨域，需要进行这个参数配置
@@ -29,7 +33,7 @@ module.exports = {
     // Use Eslint Loader?
     // If true, your code will be linted during bundling and
     // linting errors and warnings will be shown in the console.
-    useEslint: true,
+    useEslint: false,
     // If true, eslint errors and warnings will also be shown in the error overlay
     // in the browser.
     showEslintErrorsInOverlay: false,
