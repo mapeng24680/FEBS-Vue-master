@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Febs from './FEBS'
-import './assets/common/css/common.styl'
 import router from './router'
 import Antd from 'ant-design-vue'
 import store from './store'
@@ -9,6 +8,7 @@ import db from 'utils/localstorage'
 import VueApexCharts from 'vue-apexcharts'
 
 import 'ant-design-vue/dist/antd.css'
+import './assets/common/css/common.styl'
 
 import 'utils/install'
 

@@ -98,22 +98,29 @@
       @ok="handlePopUpdate"
       @cancel="visiblePop=false"
     >
-      <div class="flex-container flex-align-c">
-        <p>试题分类:</p>
+      <div class="flex-container flex-align-c margin-b-15">
+        <p>试题分类：</p>
         <a-button type="primary" ghost>请选择</a-button>
       </div>
-      <div class="flex-container flex-align-c">
-        <p>试题难度:</p>
+      <div class="flex-container flex-align-c margin-b-15">
+        <p>试题难度：</p>
         <a-radio-group :options="options" @change="onChange1" />
       </div>
       <div class="flex-container flex-align-c">
-        <p>答案乱序:</p>
+        <p>答案乱序：</p>
         <a-radio-group :disabled="disable"  :options="options1" @change="onChange1" />
+        <a-tooltip>
+          <template slot="title">
+            答案乱序仅限填空题批量更新使用，其他题型无法进行此操作
+          </template>
+          <a-icon type="question-circle" />
+        </a-tooltip>
       </div>
     </a-modal>
   </div>
 </template>
 <script>
+    import {mapState, mapMutations} from 'vuex'
     const columns = [
         {
             title: "题型",
@@ -185,7 +192,7 @@
 
             },
             getData(key) {
-                var token = `{"methodName":"showTestqmGrid","token":"ccc0dee5f6131dd283e51bcc05b66d6c","userId":10805276,"jsonParam":{"checkDup":${key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"","difficult":"","testLabel":""}}}`
+                var token = `{"methodName":"showTestqmGrid","token":${this.ksx},"userId":10947416,"jsonParam":{"checkDup":${key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"","difficult":"","testLabel":""}}}`
                 this.$post('/baseinfo/admin/excute', token).then(json => {
                     if (json.data.code == 200) {
                         this.data = json.data.data.bizContent.rows
@@ -225,7 +232,10 @@
                         );
                     }
                 };
-            }
+            },
+            ...mapState({
+                ksx: state => state.account.ksx.token
+            }),
         }
     };
 </script>

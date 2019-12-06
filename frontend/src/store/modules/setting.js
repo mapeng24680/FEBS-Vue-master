@@ -27,6 +27,7 @@ export default {
       'rgb(47, 84, 235)',
       'rgb(114, 46, 209)'
     ],
+    ksx:db.get('ksxUser'),
     color: db.get('COLOR', 'rgb(24, 144, 255)')
   },
   mutations: {
@@ -62,7 +63,7 @@ export default {
     setColor (state, color) {
       db.save('COLOR', color)
       state.color = color
-    }
+    },
   }
 }
 

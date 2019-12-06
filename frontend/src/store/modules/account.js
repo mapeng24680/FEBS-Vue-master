@@ -3,6 +3,7 @@ import db from 'utils/localstorage'
 export default {
   namespaced: true,
   state: {
+    ksx: db.get('KSX_USER'),
     token: db.get('USER_TOKEN'),
     expireTime: db.get('EXPIRE_TIME'),
     user: db.get('USER'),
@@ -10,6 +11,10 @@ export default {
     roles: db.get('ROLES')
   },
   mutations: {
+    setKsx (state, val) {
+      db.save('KSX_USER', val)
+      state.ksx = val
+    },
     setToken (state, val) {
       db.save('USER_TOKEN', val)
       state.token = val
