@@ -171,6 +171,8 @@ export default {
     text-overflow: ellipsis;
     word-break: break-all;
     white-space: nowrap;
+    padding:0;
+    margin:0;
   }
   @media screen and (min-width: 1400px) {
   }
@@ -186,5 +188,9 @@ export default {
     .page-tabs .ant-tabs-nav-container {
       font-size: 13px !important;
     }
+  }
+  *{
+    padding:0;
+    margin:0;
   }
 </style>
