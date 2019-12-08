@@ -16,6 +16,7 @@
     "babel-polyfill": "^6.26.0",
     "date-fns": "^1.29.0",
     "enquire.js": "^2.1.6",
+    "js-md5": "^0.7.3",
     "vue": "^2.6.10",
     "vue-apexcharts": "^1.2.7",
     "vue-router": "^3.0.1",
