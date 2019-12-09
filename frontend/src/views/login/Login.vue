@@ -66,11 +66,11 @@
                 error: '',
                 activeKey: '1',
                 loginObjUser: {
-                    'admin': '16533747231',
+                    'admin': '17608013618',
                     '973490661': '16533747230',
                 },
                 loginObjPwd: {
-                    'admin': '12345678',
+                    'admin': 'ysb123',
                     '973490661': '12345678'
                 },
             }
@@ -165,7 +165,7 @@
                 fixHeader: 'setting/fixHeader',
                 setColor: 'setting/setColor',
             }),
-            saveKsx(data){
+            saveKsx(data) {
                 this.setKsx(data)
             },
             saveLoginData(data) {
