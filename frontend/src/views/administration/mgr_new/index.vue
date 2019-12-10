@@ -1,5 +1,5 @@
 <template>
-  <div class="exam_mgr_new" ref="mianId" @click="tapWindowClose">
+  <div class="exam_mgr_new" ref="mianId" @click="tapWindowClose" :loading="loading">
     <div class="mgr_new_head">
       <a-Button
         @click="choseExamClick"
@@ -10,24 +10,25 @@
       <a-Button v-if="tabsDefault=='2'" type="primary" icon="plus-square">选择考生</a-Button>
       <a-Button type="primary" icon="export">导出</a-Button>
       <a-Button v-if="tabsDefault=='2'" type="primary" icon="delete">删除</a-Button>
-      <a-Button v-if="tabsDefault=='1'" type="primary" icon="vertical-align-top">批量交卷</a-Button>
+      <a-Button v-if="tabsDefault=='1'" type="primary" @click="commitExamClick" icon="vertical-align-top">批量交卷</a-Button>
       <a-Button v-if="tabsDefault=='1'" type="primary" icon="vertical-align-bottom">批量补考</a-Button>
-      <a-select
+
+      <a-popover trigger="click" v-model="visible">
+        <p style="height:30px"  slot="content">修改部门</p>
+        <p style="height:30px" @click="recoverExam" slot="content">恢复考试</p>
+        <p style="height:30px"  slot="content">导出附件链接</p>
+        <p style="height:30px"  slot="content">删除</p>
+        <a-button type="primary">更多</a-button>
+      </a-popover>
+
+      <a-button
         v-if="tabsDefault=='1'"
-        icon="appstore"
-        defaultValue="更多"
-        style="width: 120px"
-        @change="handleChange"
-      >
-        <a-select-option value="修改部门">修改部门</a-select-option>
-        <a-select-option value="恢复考试">恢复考试</a-select-option>
-        <a-select-option value="导出附件链接">导出附件链接</a-select-option>
-        <a-select-option value="删除">删除</a-select-option>
-      </a-select>
-      <a-button v-if="tabsDefault=='1'" class="moreSearch" @click="advanceClick">
-        高级搜索
-        <a-icon type="down" />
-      </a-button>
+        @click="advanceClick"
+        class="moreSearch"
+        type="primary"
+        icon="search"
+      >高级搜索</a-button>
+
       <a-input-search
         v-if="tabsDefault=='1'"
         class="searchBarClass"
@@ -43,21 +44,40 @@
       </a-tabs>
       <div class="switchClass">
         按考试查询批改按考生查询批改考生信息对子管理员可见&nbsp;
-        <a-tooltip placement="top" title="Prompt Text">
+        <a-tooltip placement="bottom" title="Prompt Text">
           <a-icon type="question-circle" />
         </a-tooltip>
-        <a-switch defaultChecked @change="onChange" />
+        <a-switch defaultChecked @change="switchChange" />
       </div>
-      <a-table :columns="columns1" :dataSource="data1" :scroll="{y: 100 }" size="small"></a-table>
+      <a-table :columns="columns1" :dataSource="data1" :pagination="pagination1"></a-table>
       <a-table
+        class="tableClass2"
         :columns="columns2"
         :dataSource="data2"
         size="small"
-        :rowSelection="rowSelection"
+        :rowSelection="{onChange:onSelectChange,selectedRowKeys}"
         :scroll="{y: tableHeight}"
-      />
+        :pagination="pagination"
+        @change="tableChange"
+      >
+        <template slot="control" slot-scope="text, record">
+          <a-tooltip>
+            <template slot="title">判分</template>
+            <a-icon type="solution" />
+          </a-tooltip>
+          <a-tooltip>
+            <template slot="title">下载</template>
+            <a-icon type="vertical-align-bottom" />
+          </a-tooltip>
+          <a-tooltip>
+            <template slot="title">删除</template>
+            <a-icon type="delete" />
+          </a-tooltip>
+        </template>
+      </a-table>
       <advance-search class="moreSearch" v-if="showSearchDialog" :location="location"></advance-search>
-      <chose-exam @closeDialog="closeDialog" v-if="showChoseExam"></chose-exam>
+      <chose-exam @closeDialog="closeDialog" @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
+      <commit-exam @closeDialog="closeDialog" :showContent='showContent' @sureCommitExam="sureCommitExam" v-if="showCommitExam"></commit-exam>
     </div>
   </div>
 </template>
@@ -65,84 +85,86 @@
 <script>
 import advanceSearch from "@/components/mgrNew/advancedSearch.vue";
 import choseExam from "@/components/mgrNew/choseExam.vue";
+import CommitExam from "@/components/mgrNew/commitExam.vue";
 
 const columns1 = [
-  { title: "考试名称", key: "1", dataIndex: "name" },
-  { title: "考试类型", key: "2", dataIndex: "type" },
-  { title: "考试时间", key: "3", dataIndex: "time" }
+  { title: "考试名称", key: "1", dataIndex: "examName" },
+  { title: "考试类型", key: "2", dataIndex: "examStyleName" },
+  { title: "考试时间", key: "3", dataIndex: "examTime" }
 ];
 const columns2 = [
-  { title: "账号", key: "1", dataIndex: "account" },
-  { title: "用户名", key: "2", dataIndex: "admin" },
-  { title: "身份认证状态", key: "3", dataIndex: "author" },
-  { title: "所属部门", key: "4", dataIndex: "part" },
-  { title: "分数", key: "5", dataIndex: "score" },
-  { title: "及格", key: "6", dataIndex: "pass" },
-  { title: "是否为补考", key: "7", dataIndex: "isPatch" },
-  { title: "强制交卷", key: "8", dataIndex: "force" },
-  { title: "交卷时间", key: "9", dataIndex: "time" },
-  { title: "操作", key: "10", dataIndex: "control" }
+  { title: "账号", key: "1", dataIndex: "phone", width: "10%" },
+  { title: "用户名", key: "2", dataIndex: "surname", width: "10%" },
+  {
+    title: "身份认证状态",
+    key: "3",
+    dataIndex: "examVerifyStatus",
+    width: "15%"
+  },
+  { title: "所属部门", key: "4", dataIndex: "depName", width: "10%" },
+  { title: "分数", key: "5", dataIndex: "results", width: "5%" },
+  { title: "及格", key: "6", dataIndex: "isPass", width: "5%" },
+  { title: "是否为补考", key: "7", dataIndex: "isMakeup", width: "8%" },
+  { title: "强制交卷", key: "8", dataIndex: "isForce", width: "8%" },
+  { title: "交卷时间", key: "9", dataIndex: "modifyTime", width: "14%" },
+  {
+    title: "操作",
+    key: "10",
+    dataIndex: "control",
+    scopedSlots: { customRender: "control" }
+  }
 ];
 const data1 = [];
 const data2 = [];
-for (let i = 0; i < 10; i++) {
-  data1.push({
-    key: i,
-    name: "考试名称",
-    type: "考试类型",
-    time: "考试时间"
-  });
-  data2.push({
-    key: i,
-    account: "考试名称",
-    admin: "用户名",
-    author: "身份认证状态",
-    part: "所属部门",
-    score: "分数",
-    pass: "及格",
-    isPatch: "是否为补考",
-    force: "强制交卷",
-    time: "交卷时间",
-    control: "操作"
-  });
-}
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
-  },
-  onSelect: (record, selected, selectedRows) => {
-    console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
-  }
-};
+
 export default {
   data() {
     return {
-      data1,
-      columns1,
-      data2,
+      visible: false,
+      data1, //选择的试卷数据
+      columns1, //选择试卷头部
+      data2, //计算的table
       columns2,
-      rowSelection,
+      loading: false,
+      pagination1: false,
       showSearchDialog: false,
       showChoseExam: false,
+      showCommitExam:false,
+      showContent:{},
+      selectedRowKeys:[],
       location: {},
       tabsDefault: "1",
-      tableHeight: 0
+      tableHeight: 0,
+      AllRights:{},
+      author: ["已通过", "认证失败", "无认证信息", "通过，与用户信息不一致"],
+      judje: ["否", "是"],
+      pagination: {
+        current: 1, //当前页数 v-model
+        defaultCurrent: 1, //默认的当前页数
+        defaultPageSize: 10, //每页显示几条数据
+        showSizeChanger: true,
+        total: data2.length, //总数
+        pageSizeOptions: ["10", "20", "30", "40", "50"],
+        showTotal: total => `共 ${data2.length} 条数据`
+      }
     };
   },
+  // watch: {
+  //   pageSize(val) {
+  //     console.log("pageSize", val);
+  //   },
+  //   current(val) {
+  //     console.log("current", val);
+  //   }
+  // },
   mounted() {
     let mainDom = this.$refs.mianId;
-    this.tableHeight = mainDom.offsetHeight - 500 + "px";
+    this.tableHeight = mainDom.offsetHeight - 580 + "px";
   },
   components: {
     advanceSearch,
-    choseExam
+    choseExam,
+    CommitExam
   },
   methods: {
     tapWindowClose(event) {
@@ -152,21 +174,243 @@ export default {
       // }
       // debugger;
     },
+    /**
+     *  分页、排序、筛选变化时触发
+     */
+    tableChange(pagination, filters, sorter) {
+      this.pagination = pagination;
+    },
+    //恢复考试  
+    recoverExam() {
+      if(this.selectedRowKeys.length == 0) {
+        this.$notification['warning']({
+          message: '提示',
+          description:
+            '请选择要恢复考试的考生成绩'
+        });
+        return false
+      }
+      this.visible = false;
+      this.showContent.title = '恢复考试'
+      this.showContent.content = '恢复考试能够将考生已经提交的试卷恢复到提交前的状态，考生能够接着提交前的试卷继续答题，正在考试的考生试卷将无法被退回。请确认是否将选中的考生进行恢复考试操作。'
+      this.showContent.tips = ''
+      this.showCommitExam = true;
+    },
+    //批量交卷
+    commitExamClick() {
+      if(this.selectedRowKeys.length == 0) {
+        this.$notification['warning']({
+          message: '提示',
+          description:
+            '请选择要交卷的考试'
+        });
+        return false
+      }
+      this.showContent.title = '批量交卷'
+      this.showContent.content = '批量交卷会立即结束考生答题，并进行交卷和判分处理，是否继续？'
+      this.showContent.tips = '注：交卷结束后可进入消息中心查看交卷情况'
+      this.showCommitExam = true;
+    },
+    //弹窗确定按钮
+    sureCommitExam() {
+      
+      this.showCommitExam = false;
+      this.loading = true;
+      if(this.showContent.title == '批量交卷') {
+        this.commitExamMethod();
+      }else {
+        this.recoverExamMethod();
+      }
+    },
+
+    //批量交卷
+    commitExamMethod() {
+      var that = this
+      var examIds = [];
+      for (var i=0;i<this.selectedRowKeys.length;i++) {
+        var index = this.selectedRowKeys[i]
+        examIds.push(this.data2[index].id);
+        
+      }
+      this.$post("/examadmin/exam/batch/force_submit", {
+        examResultsIds: examIds,
+      })
+        .then(r => {
+          let data = r.data;
+          console.log(data);
+          that.loading = false;
+          if(data.code == 10000) {
+            
+          }else {
+            this.$notification['error']({
+            message: '提示',
+            description:
+              '网络错误'
+          });
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          that.loading = false;
+        });
+    },
+    //恢复考试
+    recoverExamMethod() {
+      var that = this
+      var examIds = [];
+      for (var i=0;i<this.selectedRowKeys.length;i++) {
+        var index = this.selectedRowKeys[i]
+        examIds.push(this.data2[index].id);
+        
+      }
+      this.$post("examadmin/exam/back_exam_results", {
+        examResultsIds: examIds,
+        examInfoId:''
+      })
+        .then(r => {
+          let data = r.data;
+          console.log(data);
+          that.loading = false;
+          if(data.code == 10000) {
+            
+          }else {
+            this.$notification['error']({
+            message: '提示',
+            description:
+              '网络错误'
+          });
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          that.loading = false;
+        });
+    },
+
+    getAllRights() {
+      var that = this
+
+      this.$post("/examadmin/exam/batch/force_submit", {
+      })
+        .then(r => {
+          let data = r.data;
+          console.log(data);
+          that.loading = false;
+          if(data.code == 10000) {
+            
+          }else {
+            this.$notification['error']({
+            message: '提示',
+            description:
+              '网络错误'
+          });
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          that.loading = false;
+        });
+    },
+    //table选择事件
+    onSelectChange(selectedRowKeys) {
+      console.log("selectedRowKeys changed: ", selectedRowKeys);
+      this.selectedRowKeys = selectedRowKeys;
+    },
     onSearch() {},
     handleChange() {},
-    onChange() {},
+
+    //是否对子管理员可见
+    switchChange(value) {
+      var that = this
+      this.$get("/examadmin/admin/subadmin_islook", {
+        isLook: value ? '1' : '0',
+      })
+        .then(r => {
+          console.log(r);
+        })
+        .catch(e => {
+          console.error(e);
+        });
+    },
     tabsCallback(activeKey) {
       this.tabsDefault = activeKey;
     },
+    //高级搜索确定
     advanceClick(event) {
       this.location = event;
       this.showSearchDialog = !this.showSearchDialog;
     },
+    //关闭考试选择
     choseExamClick() {
       this.showChoseExam = !this.showChoseExam;
     },
+    //关闭弹窗
     closeDialog() {
       this.showChoseExam = false;
+      this.showCommitExam = false;
+    },
+    //考试选择后
+    chosedExam(exam) {
+      let mainDom = this.$refs.mianId;
+      this.tableHeight = mainDom.offsetHeight - 340 + "px";
+
+      this.showChoseExam = false;
+      var examDic = {};
+      examDic.examName = exam.examName;
+      examDic.examStyleName = exam.examStyleName;
+      examDic.examTime = exam.modifiedTime + exam.examEndTime;
+      examDic.id = exam.id;
+
+      this.data1.push(examDic);
+      this.resultData(exam.id);
+    },
+    resultData(examId) {
+      this.loading = true;
+      this.data2 = [];
+      var that = this;
+      this.$post("examadmin/admin/result/mgr_grid", {
+        current: that.pagination.current,
+        rowCount: that.pagination.pageSize,
+        searchPhrase: "",
+        examInfoId: examId,
+        userName: "",
+        depIds: "", //所属部分
+        isGrade: "", //判分状态
+        scoreLeft: "", //分数左区间
+        scoreRight: "", //分数右区间
+        isPass: "", //是否及格
+        startTime: "", //开始时间
+        endTime: "", //结束时间
+        examVerifyStatus: "", //认证状态
+        isCommit: -1, //是否交卷
+        forceCommit: -1 //是否强制交卷
+      })
+        .then(r => {
+          let data = r.data;
+          console.log(data);
+          that.loading = false;
+          if (data.code == 10000) {
+            let mainDom = that.$refs.mianId;
+            that.tableHeight = mainDom.offsetHeight - 340 + "px";
+
+            for (var i = 0; i < data.bizContent.rows.length; i++) {
+              var dic = data.bizContent.rows[i];
+              dic.examVerifyStatus = that.author[dic.examVerifyStatus];
+              dic.isMakeup = that.judje[dic.isMakeup];
+              dic.isForce = that.judje[dic.isForce];
+              that.data2.push(dic);
+            }
+          } else {
+            this.$notification["success"]({
+              message: "提示",
+              description: "网络错误"
+            });
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          that.loading = false;
+        });
     }
   }
 };
@@ -176,6 +420,10 @@ export default {
   width: 100%;
   overflow: scroll;
   position: relative;
+  .tableClass2 {
+    margin-top: 20px;
+    padding: 0;
+  }
   .mgr_new_head {
     .moreSearch {
       float: right;

@@ -1,5 +1,5 @@
 <template>
-  <div class="mainClass" :loading="loading">
+  <div class="mainClass">
     <a-modal
       class="dialogClass"
       title="选择考试"
@@ -7,13 +7,13 @@
       @ok="handleOk"
       @cancel="cancleClick"
       width="70%"
-      centered="true"
+      centered='centered'
     >
       <a-row type="flex" justify="center" :gutter="20">
         <a-col :span="6">
           <div class="itemClass">
             <div class="titleClass">考试名称：</div>
-            <a-input style="width:150px" />
+            <a-input style="width:150px" v-model="examName"/>
           </div>
         </a-col>
         <a-col :span="5">
@@ -28,22 +28,24 @@
         <a-col :span="8">
           <div class="itemClass">
             <div class="titleClass">考试时间：</div>
-            <a-range-picker @change="onChange" style="width:250px" />
+            <a-range-picker @change="examTimeChange" style="width:250px" />
           </div>
         </a-col>
       </a-row>
       <div class="buttonClass">
-        <a-button style="width:100px">重置</a-button>
-        <a-button type="primary" style="width:100px">搜索</a-button>
+        <a-button style="width:100px" @click="repeatClick">重置</a-button>
+        <a-button type="primary" style="width:100px" @click="searchClick">搜索</a-button>
       </div>
 
       <a-divider orientation="right"></a-divider>
-      <a-table
-        :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
-        :columns="columns"
-        :dataSource="data"
-        :scroll="{y: 300 }"
-      />
+      <a-spin :spinning="loading">
+        <a-table
+          :rowSelection="{type:'radio',columnTitle:'选择',onChange:onSelectChange,selectedRowKeys}"
+          :columns="columns"
+          :dataSource="gridData"
+          :scroll="{y: 300 }"
+        />
+      </a-spin>
     </a-modal>
   </div>
 </template>
@@ -52,63 +54,68 @@
 const columns = [
   {
     title: "考试名称",
-    dataIndex: "name"
+    dataIndex: "examName"
   },
   {
-    title: "考试分类",
-    dataIndex: "age"
+    title: "考试类型",
+    dataIndex: "examStyleName"
   },
   {
     title: "总分",
-    dataIndex: "scroe"
+    dataIndex: "paperTotalScore"
   },
   {
     title: "开始时间",
-    dataIndex: "startTime"
+    dataIndex: "modifiedTime"
   },
   {
     title: "结束时间",
-    dataIndex: "endTime"
+    dataIndex: "examEndTime"
   },
   {
     title: "创建人",
-    dataIndex: "creatPerson"
+    dataIndex: "createUserName"
   },
   {
     title: "创建时间",
-    dataIndex: "creatTime"
+    dataIndex: "createTime"
   }
 ];
 
-const data = [];
-for (let i = 0; i < 50; i++) {
-  data.push({
-    key: i,
-    name: `Edward King ${i}`,
-    age: 32,
-    address: `London, Park Lane no. ${i}`
-  });
-}
+const gridData = [];
+
 
 export default {
   name: "ChoseExam",
   data() {
     return {
+      centered:true,
       loading:false,
       visible: true,
-      data,
       columns,
-      selectedRowKeys: [],
-      gridData:[],
+      selectedRowKeys:[],
+      gridData,
+      examName:'',
+      examStartTime:'',
+      examEndTime:''
     };
   },
   mounted() {
     this.loadExamData();
   },
-  computed() {
-
-  },
   methods: {
+    examTimeChange(date,dateString) {
+        this.examStartTime = dateString[0]
+        this.examEndTime = dateString[1]
+    },
+    searchClick() {
+      this.loadExamData()
+    },
+    repeatClick() {
+      this.examName = ''
+      this.examStartTime = ''
+      this.examEndTime = ''
+    },
     loadExamData() {
       this.loading = true;
       var that = this
@@ -116,18 +123,18 @@ export default {
         current: 1,
         rowCount: 100,
         searchPhrase: '',
-        examName: '',
+        examName: that.examName,
         examStyle: '',
         examStatus: '',
-        examStartTime: '',
-        examEndTime: '',
+        examStartTime: that.examStartTime,
+        examEndTime: that.examEndTime,
       })
         .then(r => {
-          let data = r.data.data;
+          let data = r.data;
           console.log(data);
           that.loading = false;
           if(data.code == 10000) {
-            that.gridData = data.bizContent.row
+            that.gridData = data.bizContent.rows
           }else {
             this.$notification['success']({
             message: '提示',
@@ -145,19 +152,21 @@ export default {
       console.log("selectedRowKeys changed: ", selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
     },
-    handleOk() {},
+    handleOk() {
+      if(this.selectedRowKeys.length > 0){
+        var index = this.selectedRowKeys[0]
+        this.$emit('chosedExam',this.gridData[index]);
+      }
+    },
     cancleClick() {
       this.$emit("closeDialog");
-    }
+    },
   }
 };
 </script>
 
 <style lang="less" scoped>
-// /deep/ .ant-modal-title {
-//   text-align: center;
-//   background-color: red
-// }
+
 .ant-row {
   margin: 0;
   padding: 0;

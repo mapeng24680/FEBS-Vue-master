@@ -1,7 +1,7 @@
 <template>
   <div class="exam_mgr_new">
     <div class="flex-container flex-align-c margin-b-10">
-      <a-Button type="primary" class="margin-r-5">添加试题</a-Button>
+      <a-Button type="primary" class="margin-r-5" @click="addFun()">添加试题</a-Button>
       <a-dropdown class="margin-r-5" placement="bottomCenter">
         <a-button>试题查重</a-button>
         <a-menu slot="overlay" @click="handleMenuClick">
@@ -17,68 +17,70 @@
       </div>
       <div class="margin-r-5">
         考试分类
-        <a-select  style="width: 80px" @change="handleChange">
+        <a-select style="width: 80px" @change="handleChange">
           <a-select-option value="jack">Jack</a-select-option>
           <a-select-option value="lucy">Lucy</a-select-option>
         </a-select>
       </div>
       <div class="margin-r-5">
         试题类型
-        <a-select  style="width: 120px" @change="handleChange">
-          <a-select-option v-for="item in arrList" :key="item.key" :value="item.key">{{item.label}}</a-select-option>
+        <a-select style="width: 120px" @change="handleChangeType">
+          <a-select-option v-for="item in arrList" v-if="item.key !='0'" :key="item.key" :value="item.key">
+            {{item.label}}
+          </a-select-option>
         </a-select>
       </div>
       <div class="margin-r-5">
         试题难度
-        <a-select  style="width: 80px" @change="handleChange">
+        <a-select style="width: 80px" @change="handleChange">
           <a-select-option v-for="item in arrList1" :key="item.key" :value="item.key">{{item.label}}</a-select-option>
         </a-select>
       </div>
     </div>
     <a-table :rowKey="rowFun"
-      :rowSelection="rowSelection"
-      :columns="columns"
-      :dataSource="data"
-      :scroll="{y: 300 }"
+             :rowSelection="rowSelection"
+             :columns="columns"
+             :dataSource="data"
+             :scroll="{y: 300 }"
     >
-        <div class="expandBox" slot="expandedRowRender" :key="record.id" slot-scope="record">
-          <div class="leftContent">
+      <div class="expandBox" slot="expandedRowRender" :key="record.id" slot-scope="record">
+        <div class="leftContent">
+          <div class="item">
+            <div class="keyTitle">题干</div>
+            <div class="keyValue">{{record.content}}</div>
+          </div>
+          <div>
             <div class="item">
-              <div class="keyTitle">题干</div>
-              <div class="keyValue">{{record.content}}</div>
+              <div class="keyTitle"></div>
+              <div class="keyValue">{{record.options.split('|')[0]}}</div>
             </div>
-            <div>
-              <div class="item">
-                <div class="keyTitle"></div>
-                <div class="keyValue">{{record.options.split('|')[0]}}</div>
-              </div>
-              <div class="item">
-                <div class="keyTitle"></div>
-                <div class="keyValue">{{record.options.split('|')[1]}}</div>
-              </div>
-              <div class="item">
-                <div class="keyTitle"></div>
-                <div class="keyValue">{{record.options.split('|')[2]}}&nbsp;</div>
-              </div>
+            <div class="item">
+              <div class="keyTitle"></div>
+              <div class="keyValue">{{record.options.split('|')[1]}}</div>
+            </div>
+            <div class="item">
+              <div class="keyTitle"></div>
+              <div class="keyValue">{{record.options.split('|')[2]}}&nbsp;</div>
             </div>
           </div>
-          <div class="rightContent">
-            <div class="item">
-              <div class="keyTitle">答案</div>
-              <div class="keyValue">{{record.answer}}</div>
-            </div>
-            <div class="item">
-              <div class="keyTitle">解析</div>
-              <div class="keyValue">{{record.analysis}}</div>
-            </div>
-            <div class="item">
-              <div class="keyTitle">难度</div>
-              <div class="keyValue">{{record.difficult}}</div>
-            </div> <!----></div>
         </div>
-      <template slot="edit">
-        <a-icon title="编辑" type="edit"/>
-        <a-icon title="考试链接" type="link"/>
+        <div class="rightContent">
+          <div class="item">
+            <div class="keyTitle">答案</div>
+            <div class="keyValue">{{record.answer}}</div>
+          </div>
+          <div class="item">
+            <div class="keyTitle">解析</div>
+            <div class="keyValue">{{record.analysis}}</div>
+          </div>
+          <div class="item">
+            <div class="keyTitle">难度</div>
+            <div class="keyValue">{{record.difficult}}</div>
+          </div> <!----></div>
+      </div>
+      <template slot="edit" slot-scope="text,record">
+        <a-icon title="编辑" @click="editPop(text,record.id)" type="edit"/>
+        <a-icon type="delete"/>
       </template>
     </a-table>
 
@@ -104,23 +106,46 @@
       </div>
       <div class="flex-container flex-align-c margin-b-15">
         <p>试题难度：</p>
-        <a-radio-group :options="options" @change="onChange1" />
+        <a-radio-group :options="options" @change="onChange1"/>
       </div>
       <div class="flex-container flex-align-c">
         <p>答案乱序：</p>
-        <a-radio-group :disabled="disable"  :options="options1" @change="onChange1" />
+        <a-radio-group :disabled="disable" :options="options1" @change="onChange1"/>
         <a-tooltip>
           <template slot="title">
             答案乱序仅限填空题批量更新使用，其他题型无法进行此操作
           </template>
-          <a-icon type="question-circle" />
+          <a-icon type="question-circle"/>
         </a-tooltip>
       </div>
+    </a-modal>
+    <a-modal title="试题编辑" centered :footer="null" :maskClosable="false"
+             v-model="editPopShow"
+             @ok="handlePopEdit"
+             width="73%"
+             @cancel="editPopShow=false">
+      <a-spin :spinning="spinning">
+        <wangEditor :arr-list="arrList" :arr-list1="arrList1" ></wangEditor>
+      </a-spin>
+    </a-modal>
+    <!--  新增试题-->
+    <a-modal :footer="null" :maskClosable="false"
+             title="新增试题"
+             wrapClassName="addStClass"
+             width="73%"
+             :visible="addShow"
+             @ok="handleAddFun"
+             @cancel="addShow=false"
+    >
+      <addComponent :arr-list="arrList" :arr-list1="arrList1" />
     </a-modal>
   </div>
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
+    import wangEditor from './edit/wangEditor'
+    import addComponent from './add/wangAdd'
+
     const columns = [
         {
             title: "题型",
@@ -150,57 +175,98 @@
             return {
                 columns,
                 value: [],
+                editId: '',
+                EditorObj: {},
                 data: [],
+                editPopShow: false,
+                addShow: false,
                 visible: false,
+                spinning: false,
                 disable: true,
-                selectedRows:[],
+                key: '',
+                type: '',
+                selectedRows: [],
                 visiblePop: false,
-                arrList:[
-                    {'key':'0',label:'全选'},
-                    {'key':'1',label:'单选题'},
-                    {'key':'2',label:'多选题'},
-                    {'key':'3',label:'判断题'},
-                    {'key':'4',label:'填空题'},
-                    {'key':'5',label:'问答题'},
-                    {'key':'6',label:'组合题'},
-                    {'key':'7',label:'录音题'},
+                arrList: [
+                    {'key': '0', label: '全选'},
+                    {'key': '1', label: '单选题'},
+                    {'key': '2', label: '多选题'},
+                    {'key': '3', label: '判断题'},
+                    {'key': '4', label: '填空题'},
+                    {'key': '5', label: '问答题'},
+                    // {'key': '6', label: '组合题'},
+                    // {'key': '7', label: '录音题'},
                 ],
-                arrList1:[
-                    {'key':'0',label:'简单'},
-                    {'key':'1',label:'普通'},
-                    {'key':'1',label:'困难'},
+                arrList1: [
+                    {'key': 'simple', label: '简单'},
+                    {'key': 'middle', label: '普通'},
+                    {'key': 'hard', label: '困难'},
                 ],
-                options:[
-                    { label: 'Apple', value: '0' },
-                    { label: 'Pear', value: '1' },
-                    { label: 'Orange', value: '2' },
+                options: [
+                    {label: 'Apple', value: '0'},
+                    {label: 'Pear', value: '1'},
+                    {label: 'Orange', value: '2'},
                 ],
-                options1:[
-                    { label: '开启', value: '0' },
-                    { label: '关闭', value: '1' },
+                options1: [
+                    {label: '开启', value: '0'},
+                    {label: '关闭', value: '1'},
                 ],
             };
+        },
+        components: {
+            wangEditor, addComponent
         },
         created() {
             this.getData()
         },
+        provide() {
+            return {
+                arrList1: this.arrList1,
+                arrList: this.arrList,
+            }
+        },
         methods: {
-            rowFun(record){
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
+            rowFun(record) {
                 return record.id
             },
-            onChange1(event){
+            onChange1(event) {
 
             },
+            editPop(obj, id) {
+                this.spinning = true;
+                this.$get(`/baseinfo/admin/load_data?&id=${id}`).then(json => {
+                    if (json.data.code == 10000) {
+                        this.setEdit(json.data.bizContent);
+                        this.editPopShow = true;
+                        this.spinning = false;
+                        this.$forceUpdate()
+                    }
+                })
+            },
+            handlePopEdit() {
+
+            },
+            handleAddFun() {
+
+            },
+            addFun() {
+                this.addShow = true;
+                this.setEdit(this.EditorObj);
+            },
             getData(key) {
-                var token = `{"methodName":"showTestqmGrid","token":${this.ksx},"userId":10947416,"jsonParam":{"checkDup":${key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"","difficult":"","testLabel":""}}}`
+                var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"${this.type}","difficult":"","testLabel":""}}}`
                 this.$post('/baseinfo/admin/excute', token).then(json => {
                     if (json.data.code == 200) {
                         this.data = json.data.data.bizContent.rows
                     }
                 })
             },
-            handleMenuClick({ key }) {
-                this.getData(key)
+            handleMenuClick({key}) {
+                this.key = key;
+                this.getData()
             },
             showModal() {
                 this.visible = true;
@@ -212,11 +278,15 @@
             },
             handleChange() {
             },
-            handleUpdate() {
-                this.visiblePop=true;
+            handleChangeType(value) {
+                this.type = value
+                this.getData()
             },
-            handlePopUpdate(){
-                this.visiblePop=false;
+            handleUpdate() {
+                this.visiblePop = true;
+            },
+            handlePopUpdate() {
+                this.visiblePop = false;
             },
         },
         computed: {
@@ -224,7 +294,7 @@
                 const {selectedRowKeys} = this;
                 return {
                     onChange: (selectedRowKeys, selectedRows) => {
-                        this.selectedRows=selectedRows
+                        this.selectedRows = selectedRows
                         console.log(
                             `selectedRowKeys: ${selectedRowKeys}`,
                             "selectedRows: ",
@@ -234,14 +304,14 @@
                 };
             },
             ...mapState({
-                ksx: state => state.account.ksx.token
+                ksx: state => state.account.ksx,
             }),
         }
     };
 </script>
 <style lang="stylus">
   .exam_mgr_new {
-    .expandBox{
+    .expandBox {
       width: 100%;
       box-sizing: border-box;
       padding: 20px 70px 5px 100px;
@@ -251,14 +321,17 @@
       flex-direction: row;
       -ms-flex-pack: justify;
       justify-content: space-between;
-      .leftContent,  .rightContent{
+
+      .leftContent, .rightContent {
         width: calc((100% - 60px) / 2);
-        .item{
+
+        .item {
           display: flex;
           -ms-flex-direction: row;
           flex-direction: row;
           margin-bottom: 15px;
-          .keyTitle{
+
+          .keyTitle {
             width: 38px;
             font-size: 14px;
             color: #b4b6bd;
@@ -267,8 +340,40 @@
         }
       }
     }
-  .ant-table-row-expand-icon{
-    margin-right 0 !important
+
+    .ant-table-row-expand-icon {
+      margin-right 0 !important
+    }
   }
+
+  .margin-left-54 {
+    margin-left: 54px
+  }
+
+  .addStClass {
+    .ant-modal {
+      height: 90%;
+      overflow: hidden;
+
+      .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+          height: calc(100% - 55px);
+
+          .addClass {
+            height: 100%;
+
+            .ant-tabs {
+              height: 100%;
+
+              .ant-tabs-content {
+                height: calc(100% - 55px);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 </style>
