@@ -26,3 +26,20 @@ export function delCookie(name) {
     document.cookie = name + '=' + cval + ';expires=' + exp.toGMTString()
   }
 }
+
+export function getElementTop(element) {
+
+  let actualTop = element.offsetTop || 0
+  let current = element.offsetParent
+  while (current != null) {
+    actualTop += current.offsetTop
+    current = current.offsetParent
+  }
+  return actualTop
+}
+export function TableHeight(element,currHeight=0) {
+  if(element._isVue){
+    console.error(new Error('请不要传入一个Vue对象'))
+  }
+  return  (window.innerHeight - getElementTop(element)) - currHeight
+}
