@@ -12,11 +12,15 @@
       <a-Button type="primary" class="margin-r-5">删除</a-Button>
       <a-Button @click="showModal" type="primary" class="margin-r-5">管理试题分类</a-Button>
       <div class="margin-r-5 flex-container flex-align-c">
+        搜索
+        <a-input @keyup.enter="getData()" v-model="searchKey" class="margin-l-5" style="width: 200px" placeholder="请输入试题或选项内容"/>
+      </div>
+      <div class="margin-r-5 flex-container flex-align-c">
         创建人
-        <a-input style="width: 200px" placeholder="请输入试题或选项内容"/>
+        <a-input @keyup.enter="getData()" v-model="creater" class="margin-l-5" style="width: 200px" placeholder="请输入试题或选项内容"/>
       </div>
       <div class="margin-r-5">
-        考试分类
+        试题分类
         <a-select style="width: 80px" @change="handleChange">
           <a-select-option value="jack">Jack</a-select-option>
           <a-select-option value="lucy">Lucy</a-select-option>
@@ -32,16 +36,19 @@
       </div>
       <div class="margin-r-5">
         试题难度
-        <a-select style="width: 80px" @change="handleChange">
+        <a-select v-model="difficult" style="width: 80px" @change="handleChange">
           <a-select-option v-for="item in arrList1" :key="item.key" :value="item.key">{{item.label}}</a-select-option>
         </a-select>
       </div>
     </div>
+<!--    :scroll="{y: 300,x:'100%'}"-->
+
     <a-table :rowKey="rowFun"
              :rowSelection="rowSelection"
              :columns="columns"
              :dataSource="data"
-             :scroll="{y: 300 }"
+             ref="table"
+             :scroll="{y: tableHeight,x:true}"
     >
       <div class="expandBox" slot="expandedRowRender" :key="record.id" slot-scope="record">
         <div class="leftContent">
@@ -80,7 +87,17 @@
       </div>
       <template slot="edit" slot-scope="text,record">
         <a-icon title="编辑" @click="editPop(text,record.id)" type="edit"/>
-        <a-icon type="delete"/>
+        <a-popconfirm
+          v-if="data.length"
+          @confirm="() => deletePop(text,record)"
+        >
+          <a-icon slot="icon" type="question-circle-o" style="color: red" />
+          <template slot="title">
+            <div class="message-box__title">确定要删除选中的试题吗?</div>
+            <p class="message-box__message">同时删除试卷中关联的试题</p>
+          </template>
+        <a-icon type="delete" />
+        </a-popconfirm>
       </template>
     </a-table>
 
@@ -145,7 +162,7 @@
     import {mapState, mapMutations} from 'vuex'
     import wangEditor from './edit/wangEditor'
     import addComponent from './add/wangAdd'
-
+    import {TableHeight} from  '@/utils/common'
     const columns = [
         {
             title: "题型",
@@ -176,6 +193,7 @@
                 columns,
                 value: [],
                 editId: '',
+                searchKey: '',
                 EditorObj: {},
                 data: [],
                 editPopShow: false,
@@ -185,6 +203,9 @@
                 disable: true,
                 key: '',
                 type: '',
+                difficult: '',
+                creater: '',
+                tableHeight:0,
                 selectedRows: [],
                 visiblePop: false,
                 arrList: [
@@ -219,6 +240,14 @@
         created() {
             this.getData()
         },
+        mounted(){
+            this.tableHeight=TableHeight(this.$refs.table.$el,126);
+            let that=this;
+            window.onresize = function() {
+                that.tableHeight=TableHeight(that.$refs.table.$el,126)
+            };
+
+        },
         provide() {
             return {
                 arrList1: this.arrList1,
@@ -234,6 +263,17 @@
             },
             onChange1(event) {
 
+            },
+            deletePop(obj, record){
+                let token=`{"methodName":"removeTestQm","token":"${this.ksx.token}","userId":${this.ksx.user.id},"jsonParam":{"questionIds":"${record.id}"}}`;
+                this.$post('/baseinfo/admin/excute',token).then(json=>{
+                    if(json.data.data.code == 10000){
+                        this.$message.success('删除成功');
+                        this.getData()
+                    }else {
+                        this.$message.error(json.data.data.desc);
+                    }
+                })
             },
             editPop(obj, id) {
                 this.spinning = true;
@@ -256,8 +296,8 @@
                 this.addShow = true;
                 this.setEdit(this.EditorObj);
             },
-            getData(key) {
-                var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"${this.type}","difficult":"","testLabel":""}}}`
+            getData() {
+                var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"${this.searchKey}","advancedSearchKey":{"creater":"${this.creater}","classification":"","type":"${this.type}","difficult":"${this.difficult}","testLabel":""}}}`
                 this.$post('/baseinfo/admin/excute', token).then(json => {
                     if (json.data.code == 200) {
                         this.data = json.data.data.bizContent.rows
@@ -276,7 +316,9 @@
             },
             onSearch() {
             },
-            handleChange() {
+            handleChange(value) {
+                this.difficult=value;
+                this.getData()
             },
             handleChangeType(value) {
                 this.type = value
@@ -311,6 +353,7 @@
 </script>
 <style lang="stylus">
   .exam_mgr_new {
+    width 100%
     .expandBox {
       width: 100%;
       box-sizing: border-box;
@@ -375,5 +418,18 @@
         }
       }
     }
+  }
+  .message-box__title{
+    padding-left: 0;
+    margin-bottom: 0;
+    font-size: 18px;
+    line-height: 1;
+    color: #303133;
+  }
+  .message-box__message{
+    font-size: 14px;
+    line-height: 21px;
+    color: #999;
+    padding-top: 16px;
   }
 </style>
