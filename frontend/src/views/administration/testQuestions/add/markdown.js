@@ -4,30 +4,57 @@
 // Copyright (c) 2011 Christoph Dorn <christoph@christophdorn.com> (http://www.christophdorn.com)
 
 /*jshint browser:true, devel:true */
-import $ from 'jquery';
-var qt_type = "",typeName = ['单选题','多选题','判断题','填空题','问答题']
 
-export  function  Markdown(dialect) {
-  switch (typeof dialect) {
-    case "undefined":
-      this.dialect = Markdown.dialects.Gruber;
-      break;
-    case "object":
-      this.dialect = dialect;
-      break;
-    default:
-      if ( dialect in Markdown.dialects ) {
-        this.dialect = Markdown.dialects[dialect];
-      }
-      else {
-        throw new Error("Unknown Markdown dialect '" + String(dialect) + "'");
-      }
-      break;
-  }
-  this.em_state = [];
-  this.strong_state = [];
-  this.debug_indent = "";
-}
+(function( expose ) {
+
+  /**
+   *  class Markdown
+   *
+   *  Markdown processing in Javascript done right. We have very particular views
+   *  on what constitutes 'right' which include:
+   *
+   *  - produces well-formed HTML (this means that em and strong nesting is
+   *    important)
+   *
+   *  - has an intermediate representation to allow processing of parsed data (We
+   *    in fact have two, both as [JsonML]: a markdown tree and an HTML tree).
+   *
+   *  - is easily extensible to add new dialects without having to rewrite the
+   *    entire parsing mechanics
+   *
+   *  - has a good test suite
+   *
+   *  This implementation fulfills all of these (except that the test suite could
+   *  do with expanding to automatically run all the fixtures from other Markdown
+   *  implementations.)
+   *
+   *  ##### Intermediate Representation
+   *
+   *  *TODO* Talk about this :) Its JsonML, but document the node names we use.
+   *
+   *  [JsonML]: http://jsonml.org/ "JSON Markup Language"
+   **/
+  var Markdown = expose.Markdown = function(dialect) {
+    switch (typeof dialect) {
+      case "undefined":
+        this.dialect = Markdown.dialects.Gruber;
+        break;
+      case "object":
+        this.dialect = dialect;
+        break;
+      default:
+        if ( dialect in Markdown.dialects ) {
+          this.dialect = Markdown.dialects[dialect];
+        }
+        else {
+          throw new Error("Unknown Markdown dialect '" + String(dialect) + "'");
+        }
+        break;
+    }
+    this.em_state = [];
+    this.strong_state = [];
+    this.debug_indent = "";
+  };
 
   /**
    *  parse( markdown, [dialect] ) -> JsonML
@@ -36,7 +63,7 @@ export  function  Markdown(dialect) {
    *
    *  Parse `markdown` and return a markdown document as a Markdown.JsonML tree.
    **/
-  Markdown.parse = function( source, dialect ) {
+  expose.parse = function( source, dialect ) {
     // dialect will default if undefined
     var md = new Markdown( dialect );
     return md.toTree( source );
@@ -51,10 +78,12 @@ export  function  Markdown(dialect) {
    *  Take markdown (either as a string or as a JsonML tree) and run it through
    *  [[toHTMLTree]] then turn it into a well-formated HTML fragment.
    **/
-  Markdown.toHTML = function toHTML( source , dialect , options ,type) {
+  var  $ =require('jquery')
+  var qt_type = '', typeName = ['单选题', '多选题', '判断题', '填空题', '问答题']
+  expose.toHTML = function toHTML( source , dialect , options ,type) {
     qt_type=type
-    var input = Markdown.toHTMLTree( source , dialect , options );
-    return Markdown.renderJsonML( input );
+    var input = expose.toHTMLTree( source , dialect , options );
+    return expose.renderJsonML( input );
   };
 
   /**
@@ -69,7 +98,7 @@ export  function  Markdown(dialect) {
    *  [[parse]].
    **/
 
-  Markdown.toHTMLTree = function toHTMLTree( input, dialect , options ) {
+  expose.toHTMLTree = function toHTMLTree( input, dialect , options ) {
 
     // convert string input to an MD tree
     if ( typeof input ==="string" ) input = this.parse( input, dialect );
@@ -352,7 +381,7 @@ export  function  Markdown(dialect) {
 
         block=  block.replace(/^\s*【\s*答案\s*】\s*/,' 答案：');
 
-        var m = block.match( /^\s*(答案[:：])\s*(.*?)\s*(?:\n|$)/);
+        var m = block.match( /^\s*(答案[:：])\s*(.*?)\s*(?:\n|$)/),ms='';
         if ( !m ) return undefined;
         var answer = [ "answer" ];
         var n;
@@ -367,7 +396,7 @@ export  function  Markdown(dialect) {
             return [error];
           }
         }else if(qt_type=="2") {
-         var ms = m[2].replace(/[,|，]/g,'');//匹配标点分隔符
+          ms = m[2].replace(/[,|，]/g,'');//匹配标点分隔符
           n=ms.match(/^\s*[a-h]{1,8}\s*(?:\n|$)/i);
           if(n==null){
             var error = [ "ans_error" ];
@@ -378,7 +407,7 @@ export  function  Markdown(dialect) {
             return [error];
           }
         }else if (qt_type=="3") {
-          var ms = m[2] || m[1];
+          ms = m[2] || m[1];
           n=ms.match(/^\s*(正确|错误|对|错)\s*(?:\n|$)/i);
           if(n==null){
             var error = [ "ans_error" ];
@@ -634,7 +663,7 @@ export  function  Markdown(dialect) {
    *    output, or just its children. The default `false` is to not include the
    *    root itself.
    */
-  Markdown.renderJsonML = function( jsonml, options ) {
+  expose.renderJsonML = function( jsonml, options ) {
     options = options || {};
     // include the root element in the rendered output?
     options.root = options.root || false;
@@ -680,7 +709,7 @@ export  function  Markdown(dialect) {
 
     // 各组成部分需插入代码
     var insert ={
-      "left": "<div class='question' ref='question' data-type='"+qt_type+"'>",
+      "left": "<div class='question' data-type='"+qt_type+"'>",
       "title": "<p class='qt_error'>题目（至少两个字）</p>",
       //key只存在于单选和多选
       "key": (qt_type=="1"||qt_type=="2") ? "<p class='qt_error'>选项（至少两项）</p>" : "",
@@ -905,11 +934,12 @@ export  function  Markdown(dialect) {
       checkOrRadio = "<input class='checkOrRadio' type='checkbox' />";
     }
     if(qt_type != '1'){
-      var span = "";
+      var  span = "";
     }
 
     // be careful about adding whitespace here for inline elements
     //给试题各个部分添加相应的class
+    var tag_attrs='',tag_hidden='';
     switch (tag) {
       case "title":
         // if(content.join( "" ).length<=3){
@@ -917,84 +947,84 @@ export  function  Markdown(dialect) {
         // }else {
         //     tag_attrs=" class='qt_title'";
         // }
-        var tag_attrs=" class='qt_title'";
-        return "<p" + tag_attrs + " ref='qt_title'>" + content.join( "" ).replace(/^\s*([0-9]+\.)|(((\()|（)[0-9]+((\))|）))/,"<span class='type-box'><span ref='typeBox' class='title type-name-"+qt_type+"'>$1$2</span><span class='type-name type-name-"+qt_type+"'>"+typeName[Number(qt_type)-1]+"</span>"+span+"</span>") + "</p>";
+        tag_attrs=" class='qt_title'";
+        return "<p" + tag_attrs + ">" + content.join( "" ).replace(/^\s*([0-9]+\.)|(((\()|（)[0-9]+((\))|）))/,"<span class='type-box'><span class='title type-name-"+qt_type+"'>$1$2</span><span class='type-name type-name-"+qt_type+"'>"+typeName[Number(qt_type)-1]+"</span>"+span+"</span>") + "</p>";
         break;
       case "keyA":
-        var tag_attrs=" class='key key_A'";
+        tag_attrs=" class='key key_A'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("A.", "<span class='title'>A.</span>") + "</p>";
         break;
       case "keyB":
-        var tag_attrs=" class='key key_B'";
+        tag_attrs=" class='key key_B'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("B.", "<span class='title'>B.</span>") + "</p>";
         break;
       case "keyC":
-        var tag_attrs=" class='key key_C'";
+        tag_attrs=" class='key key_C'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("C.", "<span class='title'>C.</span>") + "</p>";
         break;
       case "keyD":
-        var tag_attrs=" class='key key_D'";
+        tag_attrs=" class='key key_D'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("D.", "<span class='title'>D.</span>") + "</p>";
         break;
       case "keyE":
-        var tag_attrs=" class='key key_E'";
+        tag_attrs=" class='key key_E'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("E.", "<span class='title'>E.</span>") + "</p>";
         break;
       case "keyF":
-        var tag_attrs=" class='key key_F'";
+        tag_attrs=" class='key key_F'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("F.", "<span class='title'>F.</span>") + "</p>";
         break;
       case "keyG":
-        var tag_attrs=" class='key key_G'";
+        tag_attrs=" class='key key_G'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("G.", "<span class='title'>G.</span>") + "</p>";
         break;
       case "keyH":
-        var tag_attrs=" class='key key_H'";
+        tag_attrs=" class='key key_H'";
         return "<p" + tag_attrs + ">" + checkOrRadio + content.join( "" ).replace("H.", "<span class='title'>H.</span>") + "</p>";
         break;
       case "answer":
-        var tag_attrs=" class='qt_answer'";
-        var tag_hidden = " class=qt_answer hidden";
+        tag_attrs=" class='qt_answer'";
+        tag_hidden = " class=qt_answer hidden";
 
         if(qt_type == '1' ||qt_type == '2'){
           return "<p" + tag_hidden + ">" + content.join( "" ).replace(/(&nbsp;)*\s*答案[:：]/,"<span class='title'>答案：</span>") + "</p>";
         }else{
-          return "<p" + tag_attrs + " ref='qt_answer'>" + content.join( "" ).replace(/(&nbsp;)*\s*答案[:：]/,"<span class='title'>答案：</span>") + "</p>";
+          return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*\s*答案[:：]/,"<span class='title'>答案：</span>") + "</p>";
         }
         break;
       case 'comKeyWord':
-        var tag_attrs=" class='qt_comKeyWord'";
+        tag_attrs=" class='qt_comKeyWord'";
 
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*普通关键词[:：]/,"<span class='title'>普通关键词：</span>") + "</p>";
 
         break;
       case 'coreKeyWord':
-        var tag_attrs=" class='qt_coreKeyWord'";
+        tag_attrs=" class='qt_coreKeyWord'";
 
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*核心关键词[:：]/,"<span class='title'>核心关键词：</span>") + "</p>";
         break;
       case "ans_error":
-        var tag_attrs=" class='qt_error qt_answer'";
+        tag_attrs=" class='qt_error qt_answer'";
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*答案[:：]/,"<span class='title'>答案：</span>") + "</p>";
         break;
       case "analysis":
-        var tag_attrs=" class='qt_analysis'";
+        tag_attrs=" class='qt_analysis'";
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*解析[:：]/,"<span class='title'>解析：</span>") + "</p>";
         break;
       case "difficult":
-        var tag_attrs=" class='qt_difficult'";
+        tag_attrs=" class='qt_difficult'";
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*难度[:：]/,"<span class='title'>难度：</span>") + "</p>";
         break;
       case "label":
-        var tag_attrs=" class='qt_label'";
+        tag_attrs=" class='qt_label'";
         return "<p" + tag_attrs + ">" + content.join( "" ).replace(/(&nbsp;)*试题标签[:：]/,"<span class='title'>试题标签：</span>") + "</p>";
         break;
       case "key_error":
-        var tag_attrs=" class='qt_error qt_key'";
+        tag_attrs=" class='qt_error qt_key'";
         return "<p"+ tag_attrs + ">" + content.join( "" ) + "</p>";
         break;
       default:
-        var tag_attrs=" class='error'";
+        tag_attrs=" class='error'";
         return "<"+ tag + tag_attrs + ">" + content.join( "" ) + "</" + tag + ">";
     }
   }
@@ -1100,6 +1130,8 @@ export  function  Markdown(dialect) {
 
     return jsonml;
   }
+
+
 // merges adjacent text nodes into a single node
   function merge_text_nodes( jsonml ) {
     // skip the tag name and attribute hash
@@ -1129,5 +1161,13 @@ export  function  Markdown(dialect) {
     }
   }
 
-
-
+} )( (function() {
+  if ( typeof exports === "undefined" ) {
+    window.markdown = {};
+    return window.markdown;
+  }
+  else {
+    return exports;
+  }
+} )() );
+export  default {markdown}

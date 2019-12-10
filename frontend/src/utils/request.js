@@ -78,8 +78,8 @@ FEBS_REQUEST.interceptors.response.use((config) => {
 })
 
 const request = {
-  post (url, params) {
-    return FEBS_REQUEST.post(url, params, {
+  post (url, params,config) {
+    return FEBS_REQUEST.post(url, params, config || {
       transformRequest: [(params) => {
         let result = '';
         if (typeof params =='string'){
