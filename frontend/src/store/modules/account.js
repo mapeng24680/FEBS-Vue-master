@@ -4,6 +4,7 @@ export default {
   namespaced: true,
   state: {
     ksx: db.get('KSX_USER'),
+    editWang: db.get('EDITOR_OBJ'),
     token: db.get('USER_TOKEN'),
     expireTime: db.get('EXPIRE_TIME'),
     user: db.get('USER'),
@@ -14,6 +15,10 @@ export default {
     setKsx (state, val) {
       db.save('KSX_USER', val)
       state.ksx = val
+    },
+    setEdit (state, val) {
+      db.save('EDITOR_OBJ', val)
+      state.editWang = val
     },
     setToken (state, val) {
       db.save('USER_TOKEN', val)

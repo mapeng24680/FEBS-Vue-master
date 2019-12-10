@@ -24,7 +24,7 @@
       </div>
       <div class="margin-r-5">
         试题类型
-        <a-select  style="width: 120px" @change="handleChangeType">
+        <a-select style="width: 120px" @change="handleChangeType">
           <a-select-option v-for="item in arrList" v-if="item.key !='0'" :key="item.key" :value="item.key">
             {{item.label}}
           </a-select-option>
@@ -125,25 +125,26 @@
              width="73%"
              @cancel="editPopShow=false">
       <a-spin :spinning="spinning">
-      <wangEditor :arr-list="arrList" :arr-list1="arrList1" :editor-obj="EditorObj"></wangEditor>
+        <wangEditor :arr-list="arrList" :arr-list1="arrList1" ></wangEditor>
       </a-spin>
     </a-modal>
-<!--  新增试题-->
+    <!--  新增试题-->
     <a-modal :footer="null" :maskClosable="false"
-      title="新增试题"
+             title="新增试题"
+             wrapClassName="addStClass"
              width="73%"
-      :visible="addShow"
-      @ok="handleAddFun"
-      @cancel="addShow=false"
+             :visible="addShow"
+             @ok="handleAddFun"
+             @cancel="addShow=false"
     >
-      <addComponent :arr-list="arrList" :arr-list1="arrList1" :editor-obj="EditorObj"/>
+      <addComponent :arr-list="arrList" :arr-list1="arrList1" />
     </a-modal>
   </div>
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
     import wangEditor from './edit/wangEditor'
-    import addComponent from './add/index'
+    import addComponent from './add/wangAdd'
 
     const columns = [
         {
@@ -213,19 +214,21 @@
             };
         },
         components: {
-            wangEditor,addComponent
+            wangEditor, addComponent
         },
         created() {
             this.getData()
         },
-        provide(){
+        provide() {
             return {
                 arrList1: this.arrList1,
                 arrList: this.arrList,
-                EditorObj: this.EditorObj,
             }
         },
         methods: {
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             rowFun(record) {
                 return record.id
             },
@@ -233,12 +236,12 @@
 
             },
             editPop(obj, id) {
-                this.spinning=true;
+                this.spinning = true;
                 this.$get(`/baseinfo/admin/load_data?&id=${id}`).then(json => {
                     if (json.data.code == 10000) {
-                        this.$set(this,'EditorObj',json.data.bizContent)
+                        this.setEdit(json.data.bizContent);
                         this.editPopShow = true;
-                        this.spinning=false;
+                        this.spinning = false;
                         this.$forceUpdate()
                     }
                 })
@@ -246,12 +249,12 @@
             handlePopEdit() {
 
             },
-            handleAddFun(){
+            handleAddFun() {
 
             },
-            addFun(){
-                this.addShow=true;
-                this.EditorObj={};
+            addFun() {
+                this.addShow = true;
+                this.setEdit(this.EditorObj);
             },
             getData(key) {
                 var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"","advancedSearchKey":{"creater":"","classification":"","type":"${this.type}","difficult":"","testLabel":""}}}`
@@ -301,7 +304,7 @@
                 };
             },
             ...mapState({
-                ksx: state => state.account.ksx
+                ksx: state => state.account.ksx,
             }),
         }
     };
@@ -342,7 +345,35 @@
       margin-right 0 !important
     }
   }
+
   .margin-left-54 {
     margin-left: 54px
+  }
+
+  .addStClass {
+    .ant-modal {
+      height: 90%;
+      overflow: hidden;
+
+      .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+          height: calc(100% - 55px);
+
+          .addClass {
+            height: 100%;
+
+            .ant-tabs {
+              height: 100%;
+
+              .ant-tabs-content {
+                height: calc(100% - 55px);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 </style>

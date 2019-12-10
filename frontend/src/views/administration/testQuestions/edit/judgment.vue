@@ -14,23 +14,29 @@
 </template>
 <!--判断页面组件-->
 <script>
+    import {mapState, mapMutations} from 'vuex'
     export default {
         name: "judgment",
         data() {
             return {}
         },
-        props: {
-            EditorObj: {
-                type: Object,
-            },
-
+        computed:{
+            EditorObj:{
+                get(){
+                    return this.$store.state.account.editWang
+                },
+                set(v){},
+            }
         },
         methods: {
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             onChange(name, value) {
                 this.EditorObj['key2'] = '0';
                 this.EditorObj['key1'] = '0';
                 this.EditorObj[name] = value;
-                this.$emit('updated:EditorObj',this.EditorObj)
+                this.setEdit(this.EditorObj)
             },
         },
     }

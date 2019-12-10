@@ -42,7 +42,7 @@
 <!--问答题组件-->
 <script>
     import E from "wangEditor";
-
+    import {mapState, mapMutations} from 'vuex'
     export default {
         name: "question",
         data() {
@@ -53,11 +53,7 @@
                 arr:[],
             }
         },
-        props: {
-            EditorObj: {
-                type: Object,
-            },
-        },
+
         computed:{
             setWords(){
                 if(this.textFor.length!=0){
@@ -72,12 +68,21 @@
                     }
                     this.$set(this.EditorObj,'normalWords',this.arr.join('#'))
                     this.$set(this.EditorObj,'keyWords',this.keyArr.join('#'))
-                    this.$emit('updated:EditorObj',this.EditorObj)
+                    this.setEdit(this.EditorObj)
                     this.$forceUpdate()
                 }
             },
+            EditorObj:{
+                get(){
+                    return this.$store.state.account.editWang
+                },
+                set(v){},
+            }
         },
         methods:{
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             addFun(index){
                 //key 0 == 普通 1=核心
                 this.textFor.push({

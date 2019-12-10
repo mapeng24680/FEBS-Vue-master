@@ -35,11 +35,20 @@
 </template>
 
 <script>
+    import {mapState, mapMutations} from 'vuex'
     export default {
         name: "completion",
         data() {
             return {
                 keyA: [],
+            }
+        },
+        computed:{
+            EditorObj:{
+                get(){
+                    return this.$store.state.account.editWang
+                },
+                set(v){},
             }
         },
         created() {
@@ -56,6 +65,9 @@
             }
         },
         methods:{
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             deleteFun(event,index,key,childIndex){
                 if(key){
                     this.keyA[index][key].splice(childIndex,1)
@@ -66,20 +78,14 @@
                 }
                 this.$forceUpdate();
                 this.EditorObj[['answer'+(index+1)]]=this.keyA[index]['answer'+(index+1)].join('&&')
-                this.$emit('updated:EditorObj',this.EditorObj)
+                this.setEdit(this.EditorObj)
             },
             addText(event,index){
                 this.keyA[index]['answer'+(index+1)].push(event.target.value)
                 event.target.value='';
                 this.EditorObj[['answer'+(index+1)]]=this.keyA[index]['answer'+(index+1)].join('&&')
-                this.$emit('updated:EditorObj',this.EditorObj)
+                this.setEdit(this.EditorObj)
             },
-        },
-        props: {
-            EditorObj: {
-                type: Object,
-            },
-
         },
     }
 </script>

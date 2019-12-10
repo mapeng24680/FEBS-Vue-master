@@ -6,7 +6,7 @@
         <div class="intro">单/多选题的选项范围从 2 到 20</div>
       </div>
       <div class="flex-container flex-align-c relative" :data-name="item['key'+(index+1)]" :key="index" v-for="(item,index) in keyA">
-        <a-radio  :defaultChecked="item['key'+(index+1)] =='1' ? true : false" v-if="EditorObj.type=='1'" :style="radioStyle"
+        <a-radio :checked="item['key'+(index+1)] =='1' ? true : false" @change.native="handleRadio(index,item)" :defaultChecked="item['key'+(index+1)] =='1' ? true : false" v-if="EditorObj.type=='1'" :style="radioStyle"
                  :value="item['key'+(index+1)]"></a-radio>
         <a-checkbox :defaultChecked="item['key'+(index+1)] =='1' ? true : false" v-if="EditorObj.type=='2'"
                     :style="radioStyle" :value="item['key'+(index+1)]"></a-checkbox>
@@ -21,7 +21,7 @@
 <!--单选多选组件-->
 <script>
     import E from "wangEditor";
-
+    import {mapState, mapMutations} from 'vuex'
     export default {
         name: "checkBoxAndRadioEdit",
         data() {
@@ -38,12 +38,14 @@
                 },
             }
         },
-        props: {
-            EditorObj: {
-                type: Object,
-            },
-
-        },
+     computed:{
+         EditorObj:{
+             get(){
+                 return this.$store.state.account.editWang
+             },
+             set(v){},
+         }
+     },
         created() {
             //这里对数据进行重组
             var arr=[]
@@ -60,20 +62,36 @@
         },
         mounted() {
             for (let i = 0; i < this.keyA.length; i++) {
-                this.setEdit(i, this.EditorObj['answer' + (i + 1)])
+                this.setEditFun(i, this.EditorObj['answer' + (i + 1)])
             }
         },
         methods: {
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             addFun() {
                 this.keyA.push({})
                 this.$nextTick(() => {
-                    this.setEdit(this.keyA.length - 1, this.EditorObj['answer' + (this.keyA.length)])
+                    this.setEditFun(this.keyA.length - 1, this.EditorObj['answer' + (this.keyA.length)])
                 })
             },
             deleteFun(index) {
                 this.keyA.splice(index, 1)
             },
-            setEdit(index, answer) {
+            handleRadio(index,item){
+                for (let i=0;i<this.keyA.length;i++){
+                    this.keyA[i]['key'+(i+1)]='0'
+                }
+                this.keyA[index]['key'+(index+1)]='1';
+                var obj2 = {}
+                this.keyA.forEach((currentValue,index) => {
+                    obj2[['key'+(index+1)]] = currentValue[['key'+(index+1)]]
+                })
+                this.EditorObj=Object.assign(this.EditorObj,obj2)
+                this.setEdit(this.EditorObj)
+                this.$forceUpdate()
+            },
+            setEditFun(index, answer) {
                 let editor = new E(this.$refs['question' + index]);
                 // 编辑器的事件，每次改变会获取其html内容
                 var that = editor,self=this
@@ -81,6 +99,8 @@
                     that.$toolbarElem[0].style.display = 'none';
                     that.$textElem[0].parentElement.classList.add('active')
                     self[that.$textElem[0].parentElement.parentElement.id]=html
+                    self.setEdit(self.EditorObj)
+                    self.$forceUpdate()
                 }
                 editor.customConfig.onfocus = function () {
                     that.$toolbarElem[0].style.display = 'flex';

@@ -25,12 +25,12 @@
         <div class="tip">题干</div>
         <div class="intro">这里填写题目描述</div>
       </div>
-      <div ref="question"  class="questions_add wangEditor-container wangEditor-txt"></div>
+      <div ref="question" class="questions_add wangEditor-container wangEditor-txt"></div>
     </div>
-    <checkBoxAndRadioEdit v-if="EditorObj.type == '1' || EditorObj.type == '2'" :editor-obj.sync="EditorObj"></checkBoxAndRadioEdit>
-    <judgment v-if="EditorObj.type == '3' " :editor-obj.sync="EditorObj"></judgment>
-    <completion v-if="EditorObj.type == '4' " :editor-obj.sync="EditorObj"></completion>
-    <question v-if="EditorObj.type == '5' " :editor-obj.sync="EditorObj"></question>
+    <checkBoxAndRadioEdit v-if="EditorObj.type == '1' || EditorObj.type == '2'"></checkBoxAndRadioEdit>
+    <judgment v-if="EditorObj.type == '3' "></judgment>
+    <completion v-if="EditorObj.type == '4' "></completion>
+    <question v-if="EditorObj.type == '5' "></question>
     <div class="descPanel">
       <div class="flex-container">
         <div class="tip">解析</div>
@@ -38,7 +38,8 @@
       </div>
       <div ref="analysis" class="questions_add wangEditor-container wangEditor-txt"></div>
     </div>
-    <a-button class="margin-top-10 margin-left-54" style="width: 95%" type="link" @click="saveFun()" block>全部保存</a-button>
+    <a-button class="margin-top-10 margin-left-54" style="width: 95%" type="link" @click="saveFun()" block>全部保存
+    </a-button>
   </div>
 </template>
 <script>
@@ -47,6 +48,8 @@
     import judgment from './judgment' //判断页面组件
     import completion from './completion' //填空题组件
     import question from './question' //问答题组件
+    import {mapState, mapMutations} from 'vuex'
+
     export default {
         name: "wangEditor",
         data() {
@@ -55,33 +58,34 @@
                 editor1: null,
             };
         },
-      components:{
-          checkBoxAndRadioEdit,judgment,completion,question
-      },
-        watch:{
+        components: {
+            checkBoxAndRadioEdit, judgment, completion, question
         },
-        computed:{
+
+        watch: {},
+        computed: {
+            EditorObj: {
+                get() {
+                    return this.$store.state.account.editWang
+                },
+                set(v) {
+                },
+            }
         },
         // catchData是一个类似回调函数，来自父组件，当然也可以自己写一个函数，主要是用来获取富文本编辑器中的html内容用来传递给服务端
         props: {
             arrList1: {
                 type: Array,
             },
-            EditorObj: {
-                type: Object,
-            },
             arrList: {
                 type: Array,
-            },
-            catchData: {
-                type: Function  // 接收父组件的方法
             },
         },
         mounted() {
             this.editor = new E(this.$refs.question);
             this.editor1 = new E(this.$refs.analysis);
             // 编辑器的事件，每次改变会获取其html内容
-            var that = this.editor
+            var that = this.editor, self = this;
             this.editor.customConfig.onblur = (html) => {
                 that.$toolbarElem[0].style.display = 'none';
                 that.$textElem[0].parentElement.classList.add('active')
@@ -90,6 +94,14 @@
                 that.$toolbarElem[0].style.display = 'flex';
                 that.$textElem[0].parentElement.classList.remove('active')
             }
+            this.editor.customConfig.onchange = (html) => {
+                self.EditorObj.question = html
+                self.setEdit(self.EditorObj)
+            };
+            this.editor1.customConfig.onchange = (html) => {
+                self.EditorObj.analysis = html
+                self.setEdit(self.EditorObj)
+            };
             var that1 = this.editor1
             this.editor1.customConfig.onblur = html => {
                 that1.$toolbarElem[0].style.display = 'none';
@@ -129,29 +141,36 @@
             this.editor1.txt.html(this.EditorObj.analysis)
         },
         methods: {
+            ...mapMutations({
+                setEdit: 'account/setEdit'
+            }),
             handleChangeType(value) {
-            this.EditorObj.type=value;
+                this.EditorObj.type = value;
+                this.setEdit(this.EditorObj)
             },
             handleChange(value) {
-            this.EditorObj.difficult=value;
+                this.EditorObj.difficult = value;
+                this.setEdit(this.EditorObj)
             },
-            saveFun(){
-              this.$post('/baseinfo/admin/addtestqm',this.EditorObj).then(json=>{
+            saveFun() {
+                this.$post('/baseinfo/admin/addtestqm', this.EditorObj).then(json => {
 
-              })
+                })
             },
         },
     }
 </script>
 <style lang="stylus">
   #wangEditor {
-  .active  {
-        height: 37px !important;
-        border-top 1px solid #ccc !important
-      }
-    .w-e-toolbar{
+    .active {
+      height: 37px !important;
+      border-top 1px solid #ccc !important
+    }
+
+    .w-e-toolbar {
       display none
     }
+
     .descPanel {
       margin-bottom: 40px;
 
@@ -168,28 +187,31 @@
         color: #A9B3BF;
         vertical-align: middle;
       }
-      .wangEditor-container{
+
+      .wangEditor-container {
         margin-top: 15px;
         border-radius: 2px;
         margin-left: 55px;
         width: 95%;
       }
-      .keyRight{
+
+      .keyRight {
         width: 95%;
         vertical-align: middle;
         display: inline-block;
         margin-top: 15px;
       }
-  }
-  .anticon-close{
-    width: 17px;
-    height: 17px;
-    right: -4px;
-    z-index: 99999;
-    position: absolute;
-    top: 50%;
-    text-align: center;
-    line-height: 18px;
-  }
+    }
+
+    .anticon-close {
+      width: 17px;
+      height: 17px;
+      right: -4px;
+      z-index: 99999;
+      position: absolute;
+      top: 50%;
+      text-align: center;
+      line-height: 18px;
+    }
   }
 </style>
