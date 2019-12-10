@@ -37,5 +37,8 @@ public class FebsConstant {
     public static final String TIME_MOVIE_DETAIL_URL = "https://ticket-api-m.mtime.cn/movie/detail.api";
     public static final String TIME_MOVIE_COMING_URL = "https://api-m.mtime.cn/Movie/MovieComingNew.api";
     public static final String TIME_MOVIE_COMMENTS_URL = "https://ticket-api-m.mtime.cn/movie/hotComment.api";
-
+    //数据库 停用 --是否删除 -否
+    public static final Integer TYPE_DISABLE= 1;
+    //数据库 启用  --是否删除 -是
+    public static final Integer TYPE_ENABLE= 0;
 }

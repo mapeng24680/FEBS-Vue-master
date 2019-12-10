@@ -9,6 +9,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 
 import java.util.Date;
 
@@ -48,6 +49,26 @@ public class JWTUtil {
         try {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("username").asString();
+        } catch (JWTDecodeException e) {
+            log.error("error：{}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 获取用户名
+     *
+     * @return token中包含的用户名
+     */
+    public static String getUsername() {
+        try {
+            String token = (String) SecurityUtils.getSubject().getPrincipal();
+            String name = "";
+            if (StringUtils.isNotBlank(token)) {
+                DecodedJWT jwt = JWT.decode(token);
+                name = jwt.getClaim("username").asString();
+            }
+            return name;
         } catch (JWTDecodeException e) {
             log.error("error：{}", e.getMessage());
             return null;
