@@ -16,7 +16,7 @@
         @click="commitExamClick"
         icon="vertical-align-top"
       >批量交卷</a-Button>
-      <a-Button v-if="tabsDefault=='1'" type="primary" icon="vertical-align-bottom">批量补考</a-Button>
+      <!-- <a-Button v-if="tabsDefault=='1'" type="primary" icon="vertical-align-bottom">批量补考</a-Button> -->
 
       <a-popover v-if="tabsDefault=='1'" trigger="click" v-model="visible">
         <p style="height:30px" slot="content">修改部门</p>
@@ -51,7 +51,7 @@
       </a-tabs>
       <div class="switchClass">
         按考试查询批改按考生查询批改考生信息对子管理员可见&nbsp;
-        <a-tooltip placement="bottom" title="Prompt Text">
+        <a-tooltip placement="bottom" title="关闭后，所有子管理员不可见考生相关信息，同时无法进行导出、下载、按考生查询批改等相关功能">
           <a-icon type="question-circle" />
         </a-tooltip>
         <a-switch defaultChecked @change="switchChange" />
@@ -80,7 +80,7 @@
             </a-tooltip>
             <a-tooltip>
               <template slot="title">删除</template>
-              <a-icon type="delete" />
+              <a-icon @click.stop="deleteTableData(record)" type="delete" />
             </a-tooltip>
           </template>
         </a-table>
@@ -268,6 +268,9 @@ export default {
       //   this.showSearchDialog = false;
       // }
       // debugger;
+    },
+    deleteTableData(record){
+      debugger
     },
     /**
      *  分页、排序、筛选变化时触发
