@@ -170,9 +170,10 @@
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
+    import {TableHeight} from '@/utils/common'
     import wangEditor from './edit/wangEditor'
     import addComponent from './add/wangAdd'
-    import {TableHeight} from '@/utils/common'
+
 
     const columns = [
         {title: "题型", width: 100, dataIndex: "type", key: "type",},
@@ -196,7 +197,10 @@
                 value: [],
                 editId: '',
                 searchKey: '',
-                EditorObj: {},
+                EditorObj: {
+                    type:"1",
+                    difficult:"simple",
+                },
                 data: [],
                 editPopShow: false,
                 addShow: false,
@@ -423,7 +427,7 @@
 
             .ant-tabs {
               height: 100%;
-
+              overflow-y: auto;
               .ant-tabs-content {
                 height: calc(100% - 55px);
               }
