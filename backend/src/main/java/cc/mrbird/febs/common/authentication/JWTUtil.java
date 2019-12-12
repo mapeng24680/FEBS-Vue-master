@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class JWTUtil {
@@ -25,11 +27,12 @@ public class JWTUtil {
      * @param secret 用户的密码
      * @return 是否正确
      */
-    public static boolean verify(String token, String username, String secret) {
+    public static boolean verify(String token, String username, String secret, Long id) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm)
                     .withClaim("username", username)
+                    .withClaim("id", id)
                     .build();
             verifier.verify(token);
             log.info("token is valid");
@@ -58,17 +61,22 @@ public class JWTUtil {
     /**
      * 获取用户名
      *
-     * @return token中包含的用户名
+     * @return token中包含的用户信息
      */
-    public static String getUsername() {
+    public static Map<String, String> getUser() {
         try {
+            Map<String, String> map = new HashMap<>();
             String token = (String) SecurityUtils.getSubject().getPrincipal();
             String name = "";
+            String id = "";
             if (StringUtils.isNotBlank(token)) {
                 DecodedJWT jwt = JWT.decode(token);
                 name = jwt.getClaim("username").asString();
+                id = jwt.getClaim("id").asString();
             }
-            return name;
+            map.put("id", id);
+            map.put("name", name);
+            return map;
         } catch (JWTDecodeException e) {
             log.error("error：{}", e.getMessage());
             return null;
@@ -82,13 +90,14 @@ public class JWTUtil {
      * @param secret   用户的密码
      * @return token
      */
-    public static String sign(String username, String secret) {
+    public static String sign(String username, String secret, Long id) {
         try {
             username = StringUtils.lowerCase(username);
             Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withClaim("username", username)
+                    .withClaim("id", id)
                     .withExpiresAt(date)
                     .sign(algorithm);
         } catch (Exception e) {

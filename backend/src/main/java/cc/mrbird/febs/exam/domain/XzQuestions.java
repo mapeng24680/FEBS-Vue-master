@@ -2,9 +2,17 @@ package cc.mrbird.febs.exam.domain;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * 选择试题
@@ -12,12 +20,12 @@ import lombok.experimental.Accessors;
  * @author pengpeng
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
+@TableName("examination")
 public class XzQuestions implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
     /**
      * 所属试题模块id
      */
@@ -26,21 +34,25 @@ public class XzQuestions implements Serializable {
     /**
      * 选择题题目
      */
+    @NotBlank(message = "{required}")
     private String questionName;
 
     /**
      * 选择题选择项
      */
+    @NotBlank(message = "{required}")
     private String questionOption;
 
     /**
      * 是否多选0-单选 1-多选
      */
-    private Boolean isCheck;
+    @NotNull
+    private Integer isCheck;
 
     /**
      * 选择题答案 多选时逗号分开
      */
+    @NotBlank(message = "{required}")
     private String answer;
 
     /**

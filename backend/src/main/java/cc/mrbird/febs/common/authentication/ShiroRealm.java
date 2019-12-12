@@ -93,10 +93,10 @@ public class ShiroRealm extends AuthorizingRealm {
 
         // 通过用户名查询用户信息
         User user = userManager.getUser(username);
-
+        Long id = user.getUserId();
         if (user == null)
             throw new AuthenticationException("用户名或密码错误");
-        if (!JWTUtil.verify(token, username, user.getPassword()))
+        if (!JWTUtil.verify(token, username, user.getPassword(),id))
             throw new AuthenticationException("token校验不通过");
         return new SimpleAuthenticationInfo(token, token, "febs_shiro_realm");
     }
