@@ -32,7 +32,7 @@
               @change="passChange"
             >
               <a-select-option value="男">男</a-select-option>
-              <a-select-option value="男">女</a-select-option>
+              <a-select-option value="女">女</a-select-option>
             </a-select>
           </div>
         </a-col>
@@ -133,7 +133,7 @@ const columns = [
 
 const gridData = [];
 const filterData = {
-    userName: "sss",
+    userName: "",
     surname: "",
     sex: "请选择",
     status: "请选择",

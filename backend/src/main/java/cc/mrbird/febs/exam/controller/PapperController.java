@@ -35,7 +35,7 @@ public class PapperController extends BaseController {
     @Log("新增试卷")
     @PostMapping
     @RequiresPermissions("papper:add")
-    public void addUser(@Valid Papper papper) throws FebsException {
+    public void addPapper(@Valid Papper papper) throws FebsException {
         try {
             this.papperService.save(papper);
         } catch (Exception e) {
