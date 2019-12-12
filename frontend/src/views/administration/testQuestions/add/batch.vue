@@ -65,6 +65,20 @@
           </div>
         </div>
       </div>
+      <a-modal
+        title="导入结果"
+        :visible="pllrOK"
+        centered
+        @cancel="pllrOK=false"
+        :footer="null"
+        :zIndex="10001"
+      >
+        <p class="import_result text-center margin-b-20 ">成功导入{{bizContent.successCount}}道试题，失败{{bizContent.failCount}}道题</p>
+        <div class="flex-container flex-jus-c padd-t-10">
+          <a-button  type="primary" @click="addFun()">继续录入</a-button>
+          <a-button class="margin-l-10" type="primary" ghost @click="goTo()">去创建考试</a-button>
+        </div>
+      </a-modal>
     </a-drawer>
     <a-drawer
       title="试题范例"
@@ -97,7 +111,7 @@
 <script>
     import classification from '~/classification/Classification'
     import {obj, obj1} from './text.js'
-    import {Markdown} from './markdown'
+    import markdown from './markdown'
     import E from "wangEditor";
     import $ from 'jquery';
     import {mapState, mapMutations} from 'vuex'
@@ -112,7 +126,9 @@
             return {
                 obj, obj1,
                 visible: false,
+                pllrOK: true,
                 visible1: false,
+                bizContent:{},
                 titleText: '',
                 placement: 'bottom',
                 wrapStyle: {
@@ -126,7 +142,7 @@
         computed: {
             dragStyle() {
                 return function (index) {
-                    return `color:${this.colorDrawer[index]}`
+                    return `color:${this.colorDrawer[index]};user-select:none`
                 }
             },
             EditorObj:{
@@ -143,6 +159,12 @@
             classification
         },
         methods: {
+            addFun(){
+
+            },
+            goTo(){
+
+            },
             onChange() {
 
             },
@@ -200,7 +222,6 @@
                     }
 
                     if(type=="1"||type=="2") {
-
                         for (var k = 0, selectLen = select.length; k < selectLen; k++) {
 
                             //根据选项与ACSII的比较，判断是否为正常的排序及重复选项的存在
@@ -492,9 +513,8 @@
                         detail.forEach(function (value) {
                             ii++;
                             qt_type = value.type;
-                            html = Markdown.toHTML((value.name).join(''),undefined,undefined,qt_type);
+                            html = window.markdown.toHTML((value.name).join(''),undefined,undefined,qt_type);
                             $('#preview').append(html);
-                            self.$nextTick(function () {
                                 // 标记答案
                                 self.markAnswer(qt_type, ii);
                                 self.changeSize(ii);
@@ -514,7 +534,6 @@
                                     $("#errorText").hide();
                                     $("#nextError").hide()
                                 }
-                            })
                         });
 
                         //禁止右侧多选点击，禁止默认事件
@@ -529,35 +548,34 @@
             serializeFn(){
                 var classification = $("input[name=classification]").val();
                 // var difficult=$("select[name=difficult]").val();
-                var data=[];
-
+                var data=[],that=this;
                 $("#preview").find(".question").each(function (index,element) {
                     var type = $(this).attr('data-type');
                     var reQuestion = $(this).find(".qt_title").html().replace(/^[\s\S]*<span class="type-box"[\s\S]*>[\s\S]+<\/span>([\s\S]*)$/,"$1");
-                    var question=this.escapeHTML(reQuestion);
-                    var answer1=$(this).find(".key_A").length==0 ? "" : (this.escapeHTML($(this).find(".key_A").html())==""?" ":this.escapeHTML($(this).find(".key_A").html()));
-                    var answer2=$(this).find(".key_B").length==0 ? "" : (this.escapeHTML($(this).find(".key_B").html())==""?" ":this.escapeHTML($(this).find(".key_B").html()))
-                    var answer3=$(this).find(".key_C").length==0 ? "" : (this.escapeHTML($(this).find(".key_C").html())==""?" ":this.escapeHTML($(this).find(".key_C").html()))
-                    var answer4=$(this).find(".key_D").length==0 ? "" : (this.escapeHTML($(this).find(".key_D").html())==""?" ":this.escapeHTML($(this).find(".key_D").html()))
-                    var answer5=$(this).find(".key_E").length==0 ? "" : (this.escapeHTML($(this).find(".key_E").html())==""?" ":this.escapeHTML($(this).find(".key_E").html()))
-                    var answer6=$(this).find(".key_F").length==0 ? "" : (this.escapeHTML($(this).find(".key_F").html())==""?" ":this.escapeHTML($(this).find(".key_F").html()))
-                    var answer7=$(this).find(".key_G").length==0 ? "" : (this.escapeHTML($(this).find(".key_G").html())==""?" ":this.escapeHTML($(this).find(".key_G").html()))
-                    var answer8=$(this).find(".key_H").length==0 ? "" : (this.escapeHTML($(this).find(".key_H").html())==""?" ":this.escapeHTML($(this).find(".key_H").html()))
+                    var question=that.escapeHTML(reQuestion);
+                    var answer1=$(this).find(".key_A").length==0 ? "" : (that.escapeHTML($(this).find(".key_A").html())==""?" ":that.escapeHTML($(this).find(".key_A").html()));
+                    var answer2=$(this).find(".key_B").length==0 ? "" : (that.escapeHTML($(this).find(".key_B").html())==""?" ":that.escapeHTML($(this).find(".key_B").html()))
+                    var answer3=$(this).find(".key_C").length==0 ? "" : (that.escapeHTML($(this).find(".key_C").html())==""?" ":that.escapeHTML($(this).find(".key_C").html()))
+                    var answer4=$(this).find(".key_D").length==0 ? "" : (that.escapeHTML($(this).find(".key_D").html())==""?" ":that.escapeHTML($(this).find(".key_D").html()))
+                    var answer5=$(this).find(".key_E").length==0 ? "" : (that.escapeHTML($(this).find(".key_E").html())==""?" ":that.escapeHTML($(this).find(".key_E").html()))
+                    var answer6=$(this).find(".key_F").length==0 ? "" : (that.escapeHTML($(this).find(".key_F").html())==""?" ":that.escapeHTML($(this).find(".key_F").html()))
+                    var answer7=$(this).find(".key_G").length==0 ? "" : (that.escapeHTML($(this).find(".key_G").html())==""?" ":that.escapeHTML($(this).find(".key_G").html()))
+                    var answer8=$(this).find(".key_H").length==0 ? "" : (that.escapeHTML($(this).find(".key_H").html())==""?" ":that.escapeHTML($(this).find(".key_H").html()))
                     if(type=="1"||type=="2"){
-                        var key=this.escapeHTML($(this).find(".qt_answer").html()).replace(/&nbsp;/g,"").toUpperCase().replace(/<BR CLASS="MARKDOWN_RETURN">/g, "");
+                        var key=that.escapeHTML($(this).find(".qt_answer").html()).replace(/&nbsp;/g,"").toUpperCase().replace(/<BR CLASS="MARKDOWN_RETURN">/g, "");
                     }else if (type=="3") {
-                        var key=this.escapeHTML($(this).find(".qt_answer").html()).replace(/(^\s+)|(\s+$)/g,"").replace(/(正确|对)/,1).replace(/(错误|错)/,0);
+                        var key=that.escapeHTML($(this).find(".qt_answer").html()).replace(/(^\s+)|(\s+$)/g,"").replace(/(正确|对)/,1).replace(/(错误|错)/,0);
                     }else{
-                        var key=this.escapeHTML($(this).find(".qt_answer").html());
+                        var key=that.escapeHTML($(this).find(".qt_answer").html());
                     }
-                    var comKeyWord = $(this).find(".qt_comKeyWord").length==0 ? "" : this.escapeHTML($(this).find(".qt_comKeyWord").html());
-                    var coreKeyWord = $(this).find(".qt_coreKeyWord").length==0 ? "" : this.escapeHTML($(this).find(".qt_coreKeyWord").html());
-                    var analysis=$(this).find(".qt_analysis").length==0 ? "" : this.escapeHTML($(this).find(".qt_analysis").html());
-                    var difficult=$(this).find(".qt_difficult").length==0 ? "" : this.escapeHTML($(this).find(".qt_difficult").html());
+                    var comKeyWord = $(this).find(".qt_comKeyWord").length==0 ? "" : that.escapeHTML($(this).find(".qt_comKeyWord").html());
+                    var coreKeyWord = $(this).find(".qt_coreKeyWord").length==0 ? "" : that.escapeHTML($(this).find(".qt_coreKeyWord").html());
+                    var analysis=$(this).find(".qt_analysis").length==0 ? "" : that.escapeHTML($(this).find(".qt_analysis").html());
+                    var difficult=$(this).find(".qt_difficult").length==0 ? "" : that.escapeHTML($(this).find(".qt_difficult").html());
                     if ($(this).find(".qt_difficult").length!=0){
                         difficult=difficult.slice(0,2);
                     }
-                    var label=$(this).find(".qt_label").length==0 ? "" : this.escapeHTML($(this).find(".qt_label").html());
+                    var label=$(this).find(".qt_label").length==0 ? "" : that.escapeHTML($(this).find(".qt_label").html());
                     data[index]={
                         "classification":classification,
                         "type":type,
@@ -579,7 +597,7 @@
                         "disorder":1
                     };
                     // 若不存在该项则不存入
-                    for (i in data[index]) {
+                    for (let i in data[index]) {
                         if(data[index][i]==""||!data[index][i]){
                             delete data[index][i];
                         }
@@ -616,25 +634,15 @@
                     var dataForm=JSON.stringify(data);
                     $("#import").hide();
                     $("#import_questions").show();
-                    this.$post('/baseinfo/admin/upload_testqm_txt/',dataForm).then(json=>{
-                        $("#import_questions").hide();
-                        $("#import").show();
-                        var message="成功导入 "+json.data.data.bizContent.successCount+" 道试题，失败 "+json.data.data.bizContent.failCount+" 道题";
-                        $("#import_result").text(message);
-                        if (USER_ROLE == 'sub_admin' && KSXRIGHTS.allowPaperAdd != 1){
-                            $('#conResult').hide();
-                        }
-                        $('#txtImport').modal();
-                        // gio
-                        ksxProbe.gioTrack('enterQuestionSuccess', 1, {
-                            'questionEnterMethod_var': '批量录入',
-                            'questionEnterCount_var': json.data.data.bizContent.successCount
-                        });
-
-                        $('#txtImport').on('hidden.bs.modal', function (e) {
-                            $( '#txtImport' ).off().on( 'hidden', 'hidden.bs.modal');
-                            location.reload();
-                        })
+                    this.$post('/baseinfo/admin/upload_testqm_txt/',dataForm,{
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    }).then(json=>{
+                        debugger
+                        if(json.data.code == 10000)
+                        this.pllrOK=true;
+                        this.bizContent=json.data.bizContent;
                     })
 
                 }
@@ -705,5 +713,8 @@
         color red;
       }
     }
+  }
+  .import_result{
+    font-size 18px
   }
 </style>

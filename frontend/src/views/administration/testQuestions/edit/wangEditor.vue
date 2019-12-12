@@ -153,6 +153,9 @@
                 this.setEdit(this.EditorObj)
             },
             saveFun() {
+                if(!this.EditorObj.question){
+                    this.$message.error('题目描述不能为空');
+                }
                 this.$post('/baseinfo/admin/addtestqm', this.EditorObj).then(json => {
 
                 })

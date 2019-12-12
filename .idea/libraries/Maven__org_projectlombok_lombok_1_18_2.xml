@@ -3,9 +3,6 @@
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.2/lombok-1.18.2.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.2/lombok-1.18.2-javadoc.jar!/" />
-    </JAVADOC>
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.2/lombok-1.18.2-sources.jar!/" />
     </SOURCES>

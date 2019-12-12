@@ -3,9 +3,6 @@
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/com/baomidou/dynamic-datasource-spring-boot-starter/2.5.4/dynamic-datasource-spring-boot-starter-2.5.4.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/com/baomidou/dynamic-datasource-spring-boot-starter/2.5.4/dynamic-datasource-spring-boot-starter-2.5.4-javadoc.jar!/" />
-    </JAVADOC>
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/com/baomidou/dynamic-datasource-spring-boot-starter/2.5.4/dynamic-datasource-spring-boot-starter-2.5.4-sources.jar!/" />
     </SOURCES>

@@ -24,7 +24,8 @@
       </a-col>
       <a-col :span="18">
         <a-select class="controlClass" defaultValue="是否判分" style="width: 95%" @change="gradeChange">
-          <a-select-option value="-1">未判分</a-select-option>
+          <a-select-option value="">是否判分</a-select-option>
+          <a-select-option value="0">未判分</a-select-option>
           <a-select-option value="1">已判分</a-select-option>
         </a-select>
       </a-col>
@@ -43,6 +44,7 @@
       </a-col>
       <a-col :span="18">
         <a-select class="controlClass" defaultValue="请选择" style="width: 95%" @change="passChange">
+          <a-select-option value="">请选择</a-select-option>
           <a-select-option value="1">是</a-select-option>
           <a-select-option value="-1">否</a-select-option>
         </a-select>
@@ -81,8 +83,9 @@
       </a-col>
       <a-col :span="18">
          <a-select class="controlClass" defaultValue="请选择" style="width: 95%" @change="commitChange">
+           <a-select-option value="-1">请选择</a-select-option>
           <a-select-option value="1">是</a-select-option>
-          <a-select-option value="-1">否</a-select-option>
+          <a-select-option value="0">否</a-select-option>
         </a-select>
       </a-col>
     </a-row>
@@ -92,8 +95,9 @@
       </a-col>
       <a-col :span="18">
          <a-select class="controlClass" defaultValue="请选择" style="width: 95%" @change="forceChange">
+           <a-select-option value="-1">请选择</a-select-option>
           <a-select-option value="1">是</a-select-option>
-          <a-select-option value="-1">否</a-select-option>
+          <a-select-option value="0">否</a-select-option>
         </a-select>
       </a-col>
     </a-row>

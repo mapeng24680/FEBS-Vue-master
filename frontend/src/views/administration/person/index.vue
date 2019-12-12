@@ -1,6 +1,6 @@
 <template>
     <div class="exam_mgr_new">
-        <a-Button type="primary" icon="plus-square">创建考试</a-Button>
+        <a-Button type="primary" icon="plus-square">s s s创建考试</a-Button>
         <a-Button type="primary" icon="export">导出信息</a-Button>
         <a-Button type="primary" icon="elet">删除</a-Button>
         <a-Button type="primary" icon="vertical-align-top">置顶考试</a-Button>

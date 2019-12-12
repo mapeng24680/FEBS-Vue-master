@@ -13,11 +13,13 @@
       <a-Button @click="showModal" type="primary" class="margin-r-5">管理试题分类</a-Button>
       <div class="margin-r-5 flex-container flex-align-c">
         搜索
-        <a-input @keyup.enter="getData()" v-model="searchKey" class="margin-l-5" style="width: 200px" placeholder="请输入试题或选项内容"/>
+        <a-input @keyup.enter="getData()" v-model="searchKey" class="margin-l-5" style="width: 200px"
+                 placeholder="请输入试题或选项内容"/>
       </div>
       <div class="margin-r-5 flex-container flex-align-c">
         创建人
-        <a-input @keyup.enter="getData()" v-model="creater" class="margin-l-5" style="width: 200px" placeholder="请输入试题或选项内容"/>
+        <a-input @keyup.enter="getData()" v-model="creater" class="margin-l-5" style="width: 200px"
+                 placeholder="请输入试题或选项内容"/>
       </div>
       <div class="margin-r-5">
         试题分类
@@ -41,13 +43,21 @@
         </a-select>
       </div>
     </div>
-<!--    :scroll="{y: 300,x:'100%'}"-->
-
+    <a-spin :spinning="spinning" tip="正在请求数据,请稍等....">
     <a-table :rowKey="rowFun"
              :rowSelection="rowSelection"
              :columns="columns"
              :dataSource="data"
              ref="table"
+             @change="handleTableChange"
+             :pagination="{
+                    current:current,
+                    showQuickJumper:true,
+                    defaultPageSize:pageSize,
+                    total:total,
+                    showSizeChanger: true, // 显示可改变每页数量
+                    pageSizeOptions: ['10', '20', '30', '40'], // 每页数量选项
+                }"
              :scroll="{y: tableHeight,x:true}"
     >
       <div class="expandBox" slot="expandedRowRender" :key="record.id" slot-scope="record">
@@ -91,16 +101,16 @@
           v-if="data.length"
           @confirm="() => deletePop(text,record)"
         >
-          <a-icon slot="icon" type="question-circle-o" style="color: red" />
+          <a-icon slot="icon" type="question-circle-o" style="color: red"/>
           <template slot="title">
             <div class="message-box__title">确定要删除选中的试题吗?</div>
             <p class="message-box__message">同时删除试卷中关联的试题</p>
           </template>
-        <a-icon type="delete" />
+          <a-icon type="delete"/>
         </a-popconfirm>
       </template>
     </a-table>
-
+    </a-spin>
     <!-- 管理考试分类 -->
     <a-modal
       title="管理考试分类"
@@ -142,7 +152,7 @@
              width="73%"
              @cancel="editPopShow=false">
       <a-spin :spinning="spinning">
-        <wangEditor :arr-list="arrList" :arr-list1="arrList1" ></wangEditor>
+        <wangEditor :arr-list="arrList" :arr-list1="arrList1"></wangEditor>
       </a-spin>
     </a-modal>
     <!--  新增试题-->
@@ -154,33 +164,26 @@
              @ok="handleAddFun"
              @cancel="addShow=false"
     >
-      <addComponent :arr-list="arrList" :arr-list1="arrList1" />
+      <addComponent :arr-list="arrList" :arr-list1="arrList1"/>
     </a-modal>
   </div>
 </template>
 <script>
     import {mapState, mapMutations} from 'vuex'
+    import {TableHeight} from '@/utils/common'
     import wangEditor from './edit/wangEditor'
     import addComponent from './add/wangAdd'
-    import {TableHeight} from  '@/utils/common'
+
+
     const columns = [
-        {
-            title: "题型",
-            width: 100,
-            dataIndex: "type",
-            key: "type",
-        },
+        {title: "题型", width: 100, dataIndex: "type", key: "type",},
         {title: "分类", width: 150, dataIndex: "classification", key: "classification"},
         {title: "试题内容", dataIndex: "content", key: "content", width: 700},
         {title: "难度", dataIndex: "difficult", key: "difficult", width: 80},
         {title: "创建人", dataIndex: "creater", key: "creater", width: 100},
         {title: "创建时间", dataIndex: "createTime", key: "createTime", width: 150},
         {
-            title: "操作",
-            dataIndex: "edit",
-            key: "7",
-            align: "center",
-            scopedSlots: {
+            title: "操作", dataIndex: "edit", key: "7", align: "center", scopedSlots: {
                 // filterDropdown: "filterDropdown",
                 filterIcon: "filterIcon",
                 customRender: "edit"
@@ -194,7 +197,10 @@
                 value: [],
                 editId: '',
                 searchKey: '',
-                EditorObj: {},
+                EditorObj: {
+                    type:"1",
+                    difficult:"simple",
+                },
                 data: [],
                 editPopShow: false,
                 addShow: false,
@@ -205,7 +211,7 @@
                 type: '',
                 difficult: '',
                 creater: '',
-                tableHeight:0,
+                tableHeight: 0,
                 selectedRows: [],
                 visiblePop: false,
                 arrList: [
@@ -232,6 +238,9 @@
                     {label: '开启', value: '0'},
                     {label: '关闭', value: '1'},
                 ],
+                total: 0,
+                pageSize: 10,
+                current: 1,
             };
         },
         components: {
@@ -240,11 +249,11 @@
         created() {
             this.getData()
         },
-        mounted(){
-            this.tableHeight=TableHeight(this.$refs.table.$el,126);
-            let that=this;
-            window.onresize = function() {
-                that.tableHeight=TableHeight(that.$refs.table.$el,126)
+        mounted() {
+            this.tableHeight = TableHeight(this.$refs.table.$el, 126);
+            let that = this;
+            window.onresize = function () {
+                that.tableHeight = TableHeight(that.$refs.table.$el, 126)
             };
 
         },
@@ -264,13 +273,18 @@
             onChange1(event) {
 
             },
-            deletePop(obj, record){
-                let token=`{"methodName":"removeTestQm","token":"${this.ksx.token}","userId":${this.ksx.user.id},"jsonParam":{"questionIds":"${record.id}"}}`;
-                this.$post('/baseinfo/admin/excute',token).then(json=>{
-                    if(json.data.data.code == 10000){
+            handleTableChange(pagination) {
+                this.current = pagination.current;
+                this.pageSize = pagination.pageSize;
+                this.getData()
+            },
+            deletePop(obj, record) {
+                let token = `{"methodName":"removeTestQm","token":"${this.ksx.token}","userId":${this.ksx.user.id},"jsonParam":{"questionIds":"${record.id}"}}`;
+                this.$post('/baseinfo/admin/excute', token).then(json => {
+                    if (json.data.data.code == 10000) {
                         this.$message.success('删除成功');
                         this.getData()
-                    }else {
+                    } else {
                         this.$message.error(json.data.data.desc);
                     }
                 })
@@ -297,10 +311,13 @@
                 this.setEdit(this.EditorObj);
             },
             getData() {
-                var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":10,"current":1,"searchKey":"${this.searchKey}","advancedSearchKey":{"creater":"${this.creater}","classification":"","type":"${this.type}","difficult":"${this.difficult}","testLabel":""}}}`
+                this.spinning=true;
+                var token = `{"methodName":"showTestqmGrid","token":"${this.ksx.token}","userId":"${this.ksx.user.id}","jsonParam":{"checkDup":${this.key || '0'},"simpleSearch":false,"advancedSearch":false,"isSearching":false,"rowCount":${this.pageSize},"current":${this.current},"searchKey":"${this.searchKey}","advancedSearchKey":{"creater":"${this.creater}","classification":"","type":"${this.type}","difficult":"${this.difficult}","testLabel":""}}}`
                 this.$post('/baseinfo/admin/excute', token).then(json => {
                     if (json.data.code == 200) {
-                        this.data = json.data.data.bizContent.rows
+                        this.data = json.data.data.bizContent.rows;
+                        this.total = json.data.data.bizContent.total;
+                        this.spinning=false;
                     }
                 })
             },
@@ -317,7 +334,7 @@
             onSearch() {
             },
             handleChange(value) {
-                this.difficult=value;
+                this.difficult = value;
                 this.getData()
             },
             handleChangeType(value) {
@@ -354,6 +371,7 @@
 <style lang="stylus">
   .exam_mgr_new {
     width 100%
+
     .expandBox {
       width: 100%;
       box-sizing: border-box;
@@ -409,7 +427,7 @@
 
             .ant-tabs {
               height: 100%;
-
+              overflow-y: auto;
               .ant-tabs-content {
                 height: calc(100% - 55px);
               }
@@ -419,14 +437,16 @@
       }
     }
   }
-  .message-box__title{
+
+  .message-box__title {
     padding-left: 0;
     margin-bottom: 0;
     font-size: 18px;
     line-height: 1;
     color: #303133;
   }
-  .message-box__message{
+
+  .message-box__message {
     font-size: 14px;
     line-height: 21px;
     color: #999;
