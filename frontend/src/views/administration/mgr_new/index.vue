@@ -87,7 +87,7 @@
       </a-spin>
 
       <advance-search class="moreSearch" v-if="showSearchDialog" :location="location"></advance-search>
-      <chose-exam @closeDialog="closeDialog" @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
+      <chose-exam @closeDialog="closeDialog" isRadio='1' @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
       <chose-stu @closeDialog="closeDialog" @chosedStu="chosedStu" v-if="showChoseStu"></chose-stu>
       <commit-exam
         @closeDialog="closeDialog"

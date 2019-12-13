@@ -9,17 +9,17 @@
         <a-select-option value="Yiminghe">选择部门</a-select-option>
       </a-select>
     </div>
-    <a-row>
+    <a-row :gutter="10">
       <a-col :span="12">
         <div class="itemClass">
           <span>进入考试时间</span>
-          <a-range-picker style="width:400px" showTime @change="InterRoomChange" />
+          <a-range-picker style="width:380px" showTime @change="InterRoomChange" />
         </div>
       </a-col>
       <a-col :span="12">
         <div class="itemClass">
           <span>交卷时间</span>
-          <a-range-picker style="width:400px" showTime @change="commitExamChange" />
+          <a-range-picker style="width:380px" showTime @change="commitExamChange" />
         </div>
       </a-col>
     </a-row>
@@ -110,6 +110,10 @@ export default {
       columns,
       barType:0,
       gridData,
+      startTime1:'',
+      startTime2:'',
+      commitTime1:'',
+      commitTime2:'',
       xAxis: ["最大值", "最小值", "平均分", "应考人数", "实考人数"],
       chartData: [],
       department: "allDepartment",
@@ -126,7 +130,11 @@ export default {
       }
     };
   },
-  mounted() {},
+  mounted() {
+    this.stuInfoMethod();
+    this.stuChartMethod();
+    debugger;
+  },
   methods: {
     //考生信息
     stuInfoMethod() {
@@ -168,10 +176,10 @@ export default {
       this.$post("/analysis/ae/analysis_chart_bydep", {
         depType: that.department,
         examInfoId: that.examInfo.id,
-        startTime1: "",
-        startTime2: "",
-        commitTime1: "",
-        commitTime2: ""
+        startTime1: that.startTime1,
+        startTime2: that.startTime2,
+        commitTime1: that.commitTime1,
+        commitTime2: that.commitTime2,
       })
         .then(r => {
           let data = r.data;
@@ -230,9 +238,18 @@ export default {
       
     },
     //进入考场时间
-    InterRoomChange(date, dateString) {},
+    InterRoomChange(date, dateString) {
+      this.startTime1 = dateString[0];
+      this.startTime2 = dateString[1];
+      this.stuInfoMethod();
+      this.stuChartMethod();
+    },
     //交卷时间
     commitExamChange(date, dateString) {
+      this.commitTime1 = dateString[0];
+      this.commitTime2 = dateString[1];
+      this.stuInfoMethod();
+      this.stuChartMethod();
     },
     barChartClick(){
       this.barType = 1;
@@ -246,10 +263,14 @@ export default {
 
 <style scoped>
 .mainClass {
+  width: 100%;
   height: auto;
 }
 .ant-row {
   margin-top: 15px;
   margin-bottom: 15px;
+}
+.itemClass{
+  font-size: 13px;
 }
 </style>

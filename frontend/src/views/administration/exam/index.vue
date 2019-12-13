@@ -3,35 +3,47 @@
     <a-button @click="choseExamClick" class="choseExamBtn">选择考试</a-button>
     <exam-msg v-if="showExamMsg" :examInfo="examInfo"></exam-msg>
     <a-spin :spinning="loading">
-      <div class="bottomClass">
+      <div v-if="showExamMsg" class="bottomClass">
         <a-tabs :defaultActiveKey="tabsDefault" @change="tabsCallback">
           <a-tab-pane tab="成绩分析" key="1"></a-tab-pane>
           <a-tab-pane tab="分数段统计" key="2"></a-tab-pane>
           <a-tab-pane tab="考生信息" key="3"></a-tab-pane>
         </a-tabs>
-        <grade-analyze :examInfo="selectedExam"></grade-analyze>
+        <grade-analyze v-if="tabsDefault==1" :examInfo="selectedExam"></grade-analyze>
+        <score-section v-if="tabsDefault==2" :examInfo="selectedExam"></score-section>
+        <stu-msg v-if="tabsDefault==3" :examInfo="selectedExam"></stu-msg>
       </div>
     </a-spin>
-    <chose-exam @closeDialog="closeDialog" @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
+    <chose-exam :isRadio='isRadio' @closeDialog="closeDialog" @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
   </div>
 </template>
 <script>
+
 //考试信息
 import examMsg from "@/components/examAnalyze/examMsg.vue";
 //成绩分析
 import gradeAnalyze from "@/components/examAnalyze/gradeAnalyze.vue";
+//分数段统计
+import scoreSection from "@/components/examAnalyze/scoreSection.vue";
+//考生信息
+import stuMsg from "@/components/examAnalyze/stuMsg.vue";
+
 //选择考试
 import choseExam from "@/components/mgrNew/choseExam.vue";
+
 export default {
   //考试分析
   name: "ExamAnalyze",
   components: {
     examMsg,
     gradeAnalyze,
-    choseExam
+    choseExam,
+    scoreSection,
+    stuMsg
   },
   data() {
     return {
+      isRadio:1,
       tabsDefault: "1",
       showChoseExam: false,
       loading: false,
@@ -68,6 +80,7 @@ export default {
     },
     tabsCallback(activeKey) {
       this.tabsDefault = activeKey;
+      this.selectedExam['activeKey'] = activeKey;
     },
     //选择考试
     choseExamClick() {
@@ -89,8 +102,8 @@ export default {
 <style lang="less" scoped>
 .exam {
   width: 100%;
-  height: 640px;
-  overflow-y: auto;
+  height: 620px;
+  overflow-y: scroll;
 }
 
 .bottomClass {

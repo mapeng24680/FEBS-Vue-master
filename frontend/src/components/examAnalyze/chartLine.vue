@@ -25,7 +25,6 @@ export default {
   watch: {
     'chartData': function(value) {
       this.refreshChart();
-      debugger
     },
   },
   data() {
@@ -63,7 +62,6 @@ export default {
       //   this.chartOptions = {
       //     colors: [colors[Math.floor(Math.random() * colors.length)]]
       //   };
-      debugger
       this.$refs.count.updateSeries(this.chartData, true);
       this.$refs.count.updateOptions(
         {
