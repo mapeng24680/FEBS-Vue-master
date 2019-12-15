@@ -9,14 +9,14 @@ import VueApexCharts from 'vue-apexcharts'
 
 import 'ant-design-vue/dist/antd.css'
 import './assets/common/css/common.styl'
-
+import mixins from './mixins'
 import 'utils/install'
 
 Vue.config.productionTip = false
 Vue.use(Antd)
 Vue.use(db)
 Vue.use(VueApexCharts)
-
+Vue.mixin(mixins) //全局混合
 Vue.component('apexchart', VueApexCharts)
 
 Vue.use({

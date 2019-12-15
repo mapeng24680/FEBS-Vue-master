@@ -23,7 +23,7 @@
         考试时间
         <a-range-picker @change="onChange" />
     </div>
-     <a-table :columns="columns" :dataSource="data" :scroll="{ x: 1500, y: 300 }">
+     <a-table   :columns="columns" :dataSource="data" :scroll="{ x: 1500, y: 300 }">
     <a slot="action" slot-scope="text" href="javascript:;">action</a>
   </a-table>
     </div>
