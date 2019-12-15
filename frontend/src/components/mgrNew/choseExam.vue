@@ -40,7 +40,15 @@
       <a-divider orientation="right"></a-divider>
       <a-spin :spinning="loading">
         <a-table
+          v-if="isRadio==1"
           :rowSelection="{type:'radio',columnTitle:'选择',onChange:onSelectChange,selectedRowKeys}"
+          :columns="columns"
+          :dataSource="gridData"
+          :scroll="{y: 300 }"
+        />
+        <a-table
+          v-if="isRadio==2"
+          :rowSelection="{onChange:onSelectChange,selectedRowKeys}"
           :columns="columns"
           :dataSource="gridData"
           :scroll="{y: 300 }"
@@ -54,31 +62,38 @@
 const columns = [
   {
     title: "考试名称",
-    dataIndex: "examName"
+    dataIndex: "examName",
+    key:'0'
   },
   {
     title: "考试类型",
-    dataIndex: "examStyleName"
+    dataIndex: "examStyleName",
+    key:'1'
   },
   {
     title: "总分",
-    dataIndex: "paperTotalScore"
+    dataIndex: "paperTotalScore",
+    key:'2'
   },
   {
     title: "开始时间",
-    dataIndex: "modifiedTime"
+    dataIndex: "modifiedTime",
+    key:'3'
   },
   {
     title: "结束时间",
-    dataIndex: "examEndTime"
+    dataIndex: "examEndTime",
+    key:'4'
   },
   {
     title: "创建人",
-    dataIndex: "createUserName"
+    dataIndex: "createUserName",
+    key:'5'
   },
   {
     title: "创建时间",
-    dataIndex: "createTime"
+    dataIndex: "createTime",
+    key:'6'
   }
 ];
 
@@ -86,6 +101,7 @@ const gridData = [];
 
 
 export default {
+  props: ['isRadio'],
   name: "ChoseExam",
   data() {
     return {
@@ -153,9 +169,19 @@ export default {
       this.selectedRowKeys = selectedRowKeys;
     },
     handleOk() {
-      if(this.selectedRowKeys.length > 0){
-        var index = this.selectedRowKeys[0]
-        this.$emit('chosedExam',this.gridData[index]);
+
+      if(this.selectedRowKeys.length > 0) {
+        var that = this;
+        if(this.isRadio==1) {
+          var index = this.selectedRowKeys[0]
+          this.$emit('chosedExam',this.gridData[index]);
+        }else {
+          var selectedExam = [];
+          this.selectedRowKeys.forEach(item => {
+            selectedExam.push(that.gridData[item])
+          });
+          this.$emit('choseMultipleExam',selectedExam);
+        }
       }
     },
     cancleClick() {
@@ -171,7 +197,6 @@ export default {
   margin: 0;
   padding: 0;
 }
-
 .itemClass {
   display: flex;
 }
@@ -182,7 +207,6 @@ export default {
   text-align: right;
   width: 70px;
 }
-
 .buttonClass {
   margin-top: 20px;
   text-align: center;

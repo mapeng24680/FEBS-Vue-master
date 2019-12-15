@@ -56,10 +56,10 @@ public class LoginController {
             @NotBlank(message = "{required}") String password, HttpServletRequest request) throws Exception {
         username = StringUtils.lowerCase(username);
         password = MD5Util.encrypt(username, password);
-
         final String errorMessage = "用户名或密码错误";
         User user = this.userManager.getUser(username);
-
+        Long uId = user.getUserId();
+        String id = user.getId();
         if (user == null)
             throw new FebsException(errorMessage);
         if (!StringUtils.equals(user.getPassword(), password))
@@ -74,14 +74,12 @@ public class LoginController {
         loginLog.setUsername(username);
         this.loginLogService.saveLoginLog(loginLog);
 
-        String token = FebsUtil.encryptToken(JWTUtil.sign(username, password));
+        String token = FebsUtil.encryptToken(JWTUtil.sign(username, password, uId));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-
         String userId = this.saveTokenToRedis(user, jwtToken, request);
         user.setId(userId);
-
         Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
         return new FebsResponse().message("认证成功").data(userInfo);
     }
