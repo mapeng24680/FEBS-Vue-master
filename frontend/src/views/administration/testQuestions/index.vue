@@ -214,21 +214,6 @@
                 tableHeight: 0,
                 selectedRows: [],
                 visiblePop: false,
-                arrList: [
-                    {'key': '0', label: '全选'},
-                    {'key': '1', label: '单选题'},
-                    {'key': '2', label: '多选题'},
-                    {'key': '3', label: '判断题'},
-                    {'key': '4', label: '填空题'},
-                    {'key': '5', label: '问答题'},
-                    // {'key': '6', label: '组合题'},
-                    // {'key': '7', label: '录音题'},
-                ],
-                arrList1: [
-                    {'key': 'simple', label: '简单'},
-                    {'key': 'middle', label: '普通'},
-                    {'key': 'hard', label: '困难'},
-                ],
                 options: [
                     {label: 'Apple', value: '0'},
                     {label: 'Pear', value: '1'},
@@ -267,9 +252,6 @@
             ...mapMutations({
                 setEdit: 'account/setEdit'
             }),
-            rowFun(record) {
-                return record.id
-            },
             onChange1(event) {
 
             },

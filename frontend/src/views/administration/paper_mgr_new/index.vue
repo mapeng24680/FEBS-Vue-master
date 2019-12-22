@@ -17,7 +17,7 @@
       </div>
     </div>
     <a-spin :spinning="spinning" tip="正在请求数据,请稍等....">
-    <a-table :rowSelection="rowSelection"
+    <a-table  :rowKey="rowFun"
              ref="table"
              :pagination="{
                     current:current,
@@ -29,33 +29,33 @@
                 }"
              :columns="columns" :dataSource="data" :scroll="{y: tableHeight}">
       <template slot="edit" slot-scope="text,record">
-        <a-icon type="folder-open" title="预览"/>
-        <a-icon title="编辑" @click="editPop(text,record.id)" type="edit"/>
+        <a-icon type="folder-open" @click="editPop(text,record.id,0)" title="预览"/>
+        <a-icon title="编辑" @click="editPop(text,record.id,1)" type="edit"/>
         <a-popconfirm
           v-if="data.length"
-          @confirm="() => deletePop(text,record)"
+          @confirm="() => deletePop(text,record.id)"
         >
           <a-icon slot="icon" type="question-circle-o" style="color: red"/>
           <template slot="title">
             <div class="message-box__title">确定要删除选中的试题吗?</div>
             <p class="message-box__message">同时删除试卷中关联的试题</p>
           </template>
-          <a-icon type="delete" title="删除"/>
+          <a-icon type="delete"  title="删除"/>
         </a-popconfirm>
-        <a-icon type="copy" title="复制试卷"/>
+        <a-icon type="copy" @click="copy(text,record.id)" title="复制试卷"/>
         <a-icon type="file-add" title="创建考试"/>
       </template>
     </a-table>
     </a-spin>
 
-    <a-modal :footer="null" :maskClosable="false"
-             title="编辑试题"
-             wrapClassName="edittClass"
+    <a-modal :footer="null" :maskClosable="false" centered
+             :title="editObj.isShow=='1'?'编辑试题':'新增试题'"
+             wrapClassName="paper_mgr_newEditClass"
              width="73%"
              :visible="addShow"
              @cancel="addShow=false"
     >
-      <editIndex  :arr-list1="arrList1"/>
+      <editIndex/>
     </a-modal>
   </div>
 </template>
@@ -88,9 +88,19 @@
                 pageSize: 10,
                 current: 1,
                 paperName:'',
+                editObj:{
+                    id:'',
+                    isShow:'',
+                },
                 paperStyle:'',
                 spinning:false,
+                addShow:false,
                 columns,
+                arrList1: [
+                    {'key': 'simple', label: '简单'},
+                    {'key': 'middle', label: '普通'},
+                    {'key': 'hard', label: '困难'},
+                ],
             }
         },
         components:{
@@ -104,10 +114,39 @@
                 that.tableHeight = TableHeight(that.$refs.table.$el, 126)
             };
         },
+        provide() {
+            return {
+                getReaciveNameFromParent: () => this.editObj,
+                arrList1:this.arrList1
+            }
+        },
         methods: {
             handleChange() {
             },
             onChange() {
+            },
+            editPop(text,id,isShow){
+                this.editObj={
+                    id:id,
+                    'isShow':isShow
+                }
+                this.addShow=true
+            },
+            deletePop(text,id){
+                this.$get(`/examadmin/admin/paper/del/${id}`).then(json => {
+                    if (json.data.code == 10000) {
+                        this.$message.success('复制成功');
+                        this.getData();
+                    }
+                })
+            },
+            copy(text,id){
+                this.$post('/examadmin/admin/paper_copy', {paperInfoId:id}).then(json => {
+                    if (json.data.code == 10000) {
+                        this.$message.success('复制成功');
+                        this.getData();
+                    }
+                })
             },
             getData() {
                 this.spinning=true;
@@ -127,23 +166,38 @@
             },
         },
         computed: {
-            rowSelection() {
-                const {selectedRowKeys} = this;
-                return {
-                    onChange: (selectedRowKeys, selectedRows) => {
-                        console.log(
-                            `selectedRowKeys: ${selectedRowKeys}`,
-                            "selectedRows: ",
-                            selectedRows
-                        );
-                    }
-                };
-            }
+
         }
     }
 </script>
-<style lang="stylus" scoped>
+<style lang="stylus" >
   .exam_mgr_new {
+    width: 100%;
+  }
+  .paper_mgr_newEditClass {
+    .ant-modal {
+      height: 90%;
+      overflow: hidden;
 
+      .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+          height: calc(100% - 55px);
+
+          .addClass {
+            height: 100%;
+
+            .ant-tabs {
+              height: 100%;
+              overflow-y: auto;
+              .ant-tabs-content {
+                height: calc(100% - 55px);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 </style>

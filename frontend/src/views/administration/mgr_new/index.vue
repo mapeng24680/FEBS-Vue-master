@@ -56,7 +56,7 @@
         </a-tooltip>
         <a-switch defaultChecked @change="switchChange" />
       </div>
-      <a-table :columns="tabsDefault=='1' ? examColumns : stuColumns" :dataSource="data1" :pagination="pagination1"></a-table>
+      <a-table  :rowKey="rowFun" :columns="tabsDefault=='1' ? examColumns : stuColumns" :dataSource="data1" :pagination="pagination1"></a-table>
 
       <a-spin :spinning="loading">
         <a-table
