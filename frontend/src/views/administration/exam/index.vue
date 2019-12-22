@@ -1,7 +1,7 @@
 <template>
   <div class="exam">
-    <a-button @click="choseExamClick" class="choseExamBtn">选择考试</a-button>
-    <exam-msg v-if="showExamMsg" :examInfo="examInfo"></exam-msg>
+    <a-button @click="choseExamClick" size='small' class="choseExamBtn">选择考试</a-button>
+    <exam-msg v-if="showExamMsg" :examInfo="examInfo" @checkTextAnalyze='checkTextAnalyze'></exam-msg>
     <a-spin :spinning="loading">
       <div v-if="showExamMsg" class="bottomClass">
         <a-tabs :defaultActiveKey="tabsDefault" @change="tabsCallback">
@@ -15,10 +15,11 @@
       </div>
     </a-spin>
     <chose-exam :isRadio='isRadio' @closeDialog="closeDialog" @chosedExam="chosedExam" v-if="showChoseExam"></chose-exam>
+    <test-analyze v-if="showView"></test-analyze>
   </div>
 </template>
-<script>
 
+<script>
 //考试信息
 import examMsg from "@/components/examAnalyze/examMsg.vue";
 //成绩分析
@@ -27,7 +28,8 @@ import gradeAnalyze from "@/components/examAnalyze/gradeAnalyze.vue";
 import scoreSection from "@/components/examAnalyze/scoreSection.vue";
 //考生信息
 import stuMsg from "@/components/examAnalyze/stuMsg.vue";
-
+//考题分析
+import testAnalyze from "@/components/examAnalyze/testAnalyze.vue";
 //选择考试
 import choseExam from "@/components/mgrNew/choseExam.vue";
 
@@ -39,11 +41,13 @@ export default {
     gradeAnalyze,
     choseExam,
     scoreSection,
-    stuMsg
+    stuMsg,
+    testAnalyze
   },
   data() {
     return {
       isRadio:1,
+      showView:false,
       tabsDefault: "1",
       showChoseExam: false,
       loading: false,
@@ -94,6 +98,10 @@ export default {
       this.showChoseExam = false;
       this.examInfoMethod(exam.id);
       this.selectedExam = exam;
+    },
+    //查看考题分析
+    checkTextAnalyze(val){
+      this.showView = val;
     }
   }
 };
@@ -113,6 +121,6 @@ export default {
 .choseExamBtn {
   position: fixed;
   right: 50px;
-  top: 100px;
+  top: 90px;
 }
 </style>

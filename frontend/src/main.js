@@ -6,7 +6,7 @@ import store from './store'
 import request from 'utils/request'
 import db from 'utils/localstorage'
 import VueApexCharts from 'vue-apexcharts'
-
+import animated from 'animate.css'
 import 'ant-design-vue/dist/antd.css'
 import './assets/common/css/common.styl'
 
@@ -16,7 +16,7 @@ Vue.config.productionTip = false
 Vue.use(Antd)
 Vue.use(db)
 Vue.use(VueApexCharts)
-
+Vue.use(animated)
 Vue.component('apexchart', VueApexCharts)
 
 Vue.use({

@@ -1,6 +1,7 @@
 <template>
   <div class="mainClass">
-    <h2>{{examInfo.examName}}</h2>
+    <span class="examTitle">{{examInfo.examName}}&nbsp;</span>
+    <a-switch checkedChildren="考题分析" unCheckedChildren="考题分析" :checked='switchStatus' @click="switchChange"/>
     <a-divider orientation="left"></a-divider>
     <table>
       <tr>
@@ -53,8 +54,16 @@ export default {
   props:['examInfo'],
   //考试信息
   name: "ExamMsg",
+  data() {
+    return {
+      switchStatus:false,
+    }
+  },
   methods: {
-   
+    switchChange(val) {
+      this.switchStatus = val;
+      this.$emit('checkTextAnalyze',this.switchStatus);
+    }
   }
 };
 </script>
@@ -63,6 +72,10 @@ export default {
 .mainClass {
   width: 100%;
   position: relative;
+}
+.examTitle {
+  font-weight: bold;
+  font-size: 18px;
 }
 .ant-divider {
   margin: 10px;
